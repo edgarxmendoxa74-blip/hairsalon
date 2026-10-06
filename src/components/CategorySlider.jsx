@@ -35,7 +35,7 @@ const CategorySlider = ({ items, value, onToggle, onRemove, adding, onAdd, onCan
   };
 
   return (
-    <div className="glass-card" style={{ padding: "12px 14px" }}>
+    <div className="cat-slider-wrap">
       <div className="cat-slider">
         <button type="button" className="cat-arrow" onClick={() => slideBy(-1)} disabled={edge.start} aria-label="Previous categories">
           <ChevronLeft size={18} />
