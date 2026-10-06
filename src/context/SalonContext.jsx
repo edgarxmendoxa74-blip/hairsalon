@@ -389,7 +389,7 @@ export const SalonProvider = ({ children }) => {
   };
 
   // Complete Appointment & Auto Track Service
-  const completeAppointmentAndTrack = (aptId, tipAmount = 0, autoDeductProductIds = []) => {
+  const completeAppointmentAndTrack = (aptId, tipAmount = 0, autoDeductProductIds = [], treatmentNotes = "") => {
     const apt = appointments.find((a) => a.id === aptId);
     if (!apt) return;
 
@@ -404,6 +404,26 @@ export const SalonProvider = ({ children }) => {
       autoCreateSale: true,
       autoDeductInventoryIds: autoDeductProductIds
     });
+
+    // Save products used + treatment notes so staff can see them on the client's next visit
+    const productsUsed = inventory.filter((i) => autoDeductProductIds.includes(i.id)).map((i) => i.name);
+    const note = (treatmentNotes || "").trim();
+    if (apt.clientId && (note || productsUsed.length || apt.notes)) {
+      const record = {
+        id: `REC-${Date.now()}`,
+        date: new Date().toISOString(),
+        aptId: apt.id,
+        serviceName: apt.serviceName,
+        staffName: apt.staffName,
+        request: apt.notes || "",
+        productsUsed,
+        notes: note
+      };
+      setClients((prev) =>
+        prev.map((c) => (c.id === apt.clientId ? { ...c, treatmentRecords: [record, ...(c.treatmentRecords || [])] } : c))
+      );
+    }
+    setAppointments((prev) => prev.map((a) => (a.id === aptId ? { ...a, treatmentNotes: note } : a)));
 
     // Mark appointment as Completed
     updateAppointmentStatus(aptId, "Completed");

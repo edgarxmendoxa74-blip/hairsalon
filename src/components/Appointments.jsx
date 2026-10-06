@@ -1,3 +1,5 @@
+import ExcelSheet from "./ExcelSheet";
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -6,8 +8,6 @@ import {
   Clock,
   UserCheck,
   CheckCircle,
-  XCircle,
-  PlayCircle,
   Search,
   Check
 } from "lucide-react";
@@ -41,6 +41,7 @@ const Appointments = () => {
   });
 
   const [checkoutTip, setCheckoutTip] = useState(100);
+  const [treatmentNotes, setTreatmentNotes] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState([]);
 
   const filteredApts = appointments.filter((apt) => {
@@ -61,7 +62,8 @@ const Appointments = () => {
   const handleConfirmCheckout = (e) => {
     e.preventDefault();
     if (selectedApt) {
-      completeAppointmentAndTrack(selectedApt.id, Number(checkoutTip), selectedProductIds);
+      completeAppointmentAndTrack(selectedApt.id, Number(checkoutTip), selectedProductIds, treatmentNotes);
+      setTreatmentNotes("");
       setIsCheckoutModalOpen(false);
       setSelectedApt(null);
       setSelectedProductIds([]);
@@ -88,9 +90,12 @@ const Appointments = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsBookModalOpen(true)}>
-          <PlusCircle size={20} /> Book New Appointment
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="appointments" rows={filteredApts} columns={[{ label: "Appointment ID", value: (a) => a.id }, { label: "Date", value: (a) => a.date }, { label: "Time", value: (a) => a.time }, { label: "Client", value: (a) => a.clientName }, { label: "Phone", value: (a) => a.clientPhone }, { label: "Service", value: (a) => a.serviceName }, { label: "Stylist", value: (a) => a.staffName }, { label: "Duration (min)", value: (a) => a.duration }, { label: "Amount (PHP)", value: (a) => a.amount }, { label: "Status", value: (a) => a.status }]} />
+          <button className="btn-primary" onClick={() => setIsBookModalOpen(true)}>
+            <PlusCircle size={20} /> Book New Appointment
+          </button>
+        </div>
       </div>
 
       {/* FILTERS & SEARCH */}
@@ -125,48 +130,51 @@ const Appointments = () => {
 
       {/* APPOINTMENTS CARDS / TABLE GRID */}
       <div className="glass-card">
-        <div className="log-column">
-          {filteredApts.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
-              No appointments found.
-            </div>
-          ) : (
-            filteredApts.map((apt) => (
-              <div key={apt.id} className="log-item">
-                <div className="log-item-head">
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: "15px" }}>{apt.clientName}</div>
-                    <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>{apt.clientPhone}</div>
-                  </div>
-                  <span className={`status-badge ${apt.status.toLowerCase().replace("-", "")}`}>{apt.status}</span>
-                </div>
-                <div className="log-item-body">
-                  <div><span>Time & Date</span><b><span style={{ color: "var(--accent-rose)" }}>{apt.time}</span> • {apt.date}</b></div>
-                  <div><span>Service</span><b>{apt.serviceName}</b></div>
-                  <div><span>Stylist</span><b style={{ color: "var(--accent-purple)" }}>{apt.staffName}</b></div>
-                  <div><span>Amount</span><b>₱{apt.amount.toLocaleString()}</b></div>
-                </div>
-                {(apt.status === "Scheduled" || apt.status === "In-Progress") && (
-                  <div className="row-actions apt-actions">
-                    {apt.status === "Scheduled" && (
-                      <button className="btn-secondary" style={{ height: "38px", fontSize: "13px", color: "#38bdf8" }} onClick={() => updateAppointmentStatus(apt.id, "In-Progress")}>
-                        <PlayCircle size={14} /> Start Service
-                      </button>
-                    )}
-                    <button className="btn-primary" style={{ height: "38px", fontSize: "13px" }} onClick={() => { setSelectedApt(apt); setIsCheckoutModalOpen(true); }}>
-                      <CheckCircle size={14} /> Complete & Track
-                    </button>
-                    {apt.status === "Scheduled" && (
-                      <button className="btn-secondary btn-danger" style={{ height: "38px", fontSize: "13px" }} onClick={() => updateAppointmentStatus(apt.id, "Cancelled")}>
-                        <XCircle size={14} /> Cancel
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+        {filteredApts.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
+            No appointments found.
+          </div>
+        ) : (
+          <ExcelSheet
+            columns={[
+              { key: "when", label: "Time & Date", style: { whiteSpace: "nowrap" }, render: (a) => (<><div style={{ fontWeight: 700, color: "var(--accent-rose)" }}>{a.time}</div><div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{a.date}</div></>) },
+              { key: "client", label: "Client Name", render: (a) => (<><div style={{ fontWeight: 700 }}>{a.clientName}</div><div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{a.clientPhone}</div></>) },
+              { key: "serviceName", label: "Service Booked", render: (a) => (<><div style={{ fontWeight: 600 }}>{a.serviceName}</div>{(a.notes || a.treatmentNotes) && (<div className="apt-note" title={[a.notes, a.treatmentNotes].filter(Boolean).join(" | ")}>📝 {a.treatmentNotes || a.notes}</div>)}</>) },
+              { key: "staffName", label: "Assigned Stylist", style: { fontWeight: 600, color: "var(--accent-purple)" } },
+              { key: "amount", label: "Amount (₱)", style: { fontWeight: 800 }, render: (a) => `₱${a.amount.toLocaleString()}` },
+              { key: "status", label: "Status", render: (a) => (<span className={`status-badge ${a.status.toLowerCase().replace("-", "")}`}>{a.status}</span>) },
+              { key: "actions", label: "Actions", render: (a) => {
+                const canStart = a.status === "Scheduled";
+                const canComplete = a.status === "Scheduled" || a.status === "In-Progress";
+                const canCancel = a.status === "Scheduled";
+                if (!canStart && !canComplete && !canCancel) {
+                  return <span style={{ color: "var(--text-dim)", fontSize: "13px" }}>No actions</span>;
+                }
+                return (
+                  <select
+                    className="form-control action-select"
+                    aria-label={"Actions for " + a.clientName}
+                    value=""
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "start") updateAppointmentStatus(a.id, "In-Progress");
+                      else if (v === "complete") { setSelectedApt(a); setIsCheckoutModalOpen(true); }
+                      else if (v === "cancel") {
+                        if (window.confirm("Cancel the appointment for " + a.clientName + "?")) updateAppointmentStatus(a.id, "Cancelled");
+                      }
+                    }}
+                  >
+                    <option value="" disabled>Select action…</option>
+                    {canStart && <option value="start">Start Service</option>}
+                    {canComplete && <option value="complete">Complete &amp; Track</option>}
+                    {canCancel && <option value="cancel">Cancel Appointment</option>}
+                  </select>
+                );
+              } }
+            ]}
+            rows={filteredApts}
+          />
+        )}
       </div>
 
       {/* MODAL 1: BOOK APPOINTMENT */}
@@ -245,11 +253,25 @@ const Appointments = () => {
                     />
                   </div>
 
+                  {(() => {
+                    const c = clients.find((x) => x.id === bookForm.clientId);
+                    const last = c?.treatmentRecords?.[0];
+                    if (!last) return null;
+                    return (
+                      <div className="last-record" style={{ gridColumn: "span 2" }}>
+                        <div className="last-record-title">Last visit record — {new Date(last.date).toLocaleDateString()} ({last.serviceName})</div>
+                        {last.request && <div><b>Request:</b> {last.request}</div>}
+                        {last.productsUsed?.length > 0 && <div><b>Products / meds used:</b> {last.productsUsed.join(", ")}</div>}
+                        {last.notes && <div><b>Notes:</b> {last.notes}</div>}
+                      </div>
+                    );
+                  })()}
+
                   <div className="form-group" style={{ gridColumn: "span 2" }}>
-                    <label>Special Instructions / Notes</label>
+                    <label>Special Instructions / Customer Requests</label>
                     <textarea
                       className="form-control"
-                      placeholder="e.g. Hair color preference, allergy notes..."
+                      placeholder="e.g. Hair color preference, allergy notes, requested treatment..."
                       value={bookForm.notes}
                       onChange={(e) => setBookForm({ ...bookForm, notes: e.target.value })}
                     />
@@ -311,6 +333,19 @@ const Appointments = () => {
                         <span>{inv.name} ({inv.currentStock} {inv.unit} left)</span>
                       </label>
                     ))}
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: "16px" }}>
+                  <label>Treatment Notes (products / meds used, reactions, next-visit reminders)</label>
+                  <textarea
+                    className="form-control"
+                    placeholder="e.g. Used 20vol developer + ash brown dye, mild scalp sensitivity. Prefers no ammonia next time."
+                    value={treatmentNotes}
+                    onChange={(e) => setTreatmentNotes(e.target.value)}
+                  />
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                    Saved to {selectedApt.clientName}'s client record, together with the products ticked above.
                   </div>
                 </div>
               </div>

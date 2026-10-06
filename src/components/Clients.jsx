@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -83,9 +84,12 @@ const Clients = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={openAdd}>
-          <PlusCircle size={20} /> Register New Client
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="clients" rows={filteredClients} columns={[{ label: "Client ID", value: (c) => c.id }, { label: "Name", value: (c) => c.name }, { label: "Phone", value: (c) => c.phone }, { label: "Email", value: (c) => c.email }, { label: "VIP", value: (c) => (c.vip ? "Yes" : "No") }, { label: "Total Visits", value: (c) => c.totalVisits }, { label: "Total Spent (PHP)", value: (c) => c.totalSpent }, { label: "Registered", value: (c) => c.registeredDate }, { label: "Notes", value: (c) => c.notes }, { label: "Last Treatment Notes", value: (c) => { const r = c.treatmentRecords?.[0]; return r ? [r.productsUsed?.join(", "), r.notes].filter(Boolean).join(" — ") : ""; } }]} />
+          <button className="btn-primary" onClick={openAdd}>
+            <PlusCircle size={20} /> Register New Client
+          </button>
+        </div>
       </div>
 
       {/* SEARCH BAR */}
@@ -104,9 +108,9 @@ const Clients = () => {
       </div>
 
       {/* CLIENT CARDS GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+      <div className="client-grid">
         {filteredClients.map((client) => (
-          <div key={client.id} className="glass-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div key={client.id} className="glass-card client-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
                 <div>
@@ -135,6 +139,12 @@ const Clients = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <Mail size={14} color="var(--accent-sky)" /> {client.email}
                 </div>
+                {client.treatmentRecords?.[0] && (
+                  <div className="client-last-record">
+                    <b>Last visit ({new Date(client.treatmentRecords[0].date).toLocaleDateString()}):</b>{" "}
+                    {[client.treatmentRecords[0].productsUsed?.join(", "), client.treatmentRecords[0].notes].filter(Boolean).join(" — ") || client.treatmentRecords[0].serviceName}
+                  </div>
+                )}
                 {client.notes && (
                   <div style={{ background: "var(--bg-input)", padding: "8px 12px", borderRadius: "8px", marginTop: "4px", fontSize: "12px", color: "var(--text-main)" }}>
                     <strong>Note:</strong> {client.notes}
@@ -214,6 +224,24 @@ const Clients = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              <h4 style={{ fontSize: "15px", marginBottom: "12px" }}>Treatment Records & Notes</h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+                {(selectedClientHistory.treatmentRecords || []).length === 0 ? (
+                  <div style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+                    No treatment notes yet. They are saved when an appointment is completed.
+                  </div>
+                ) : (
+                  selectedClientHistory.treatmentRecords.map((r) => (
+                    <div key={r.id} className="last-record">
+                      <div className="last-record-title">{new Date(r.date).toLocaleDateString()} — {r.serviceName} • {r.staffName}</div>
+                      {r.request && <div><b>Request:</b> {r.request}</div>}
+                      {r.productsUsed?.length > 0 && <div><b>Products / meds used:</b> {r.productsUsed.join(", ")}</div>}
+                      {r.notes && <div><b>Notes:</b> {r.notes}</div>}
+                    </div>
+                  ))
+                )}
               </div>
 
               <h4 style={{ fontSize: "15px", marginBottom: "12px" }}>POS Transactions & Retail Purchases</h4>

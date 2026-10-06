@@ -1,5 +1,6 @@
 import React from "react";
 import { useSalon } from "../context/SalonContext";
+import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
   Calendar,
@@ -10,11 +11,13 @@ import {
   Package,
   CreditCard,
   BarChart3,
+  LogOut,
   LineChart
 } from "lucide-react";
 
 const Navigation = () => {
   const { activeTab, setActiveTab, lowStockCount, todayAppointmentsCount } = useSalon();
+  const { signOut } = useAuth();
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -69,10 +72,10 @@ const Navigation = () => {
         </nav>
       </div>
 
-      {/* Footer info inside sidebar */}
-      <div style={{ padding: "12px", borderTop: "1px solid var(--border-color)", marginTop: "16px", fontSize: "12px", color: "var(--text-muted)" }}>
-        <div style={{ fontWeight: 700, color: "var(--text-main)", marginBottom: "2px" }}>Tablet Mode Active</div>
-        <div>Touch POS v2.5 • Ph Peso (₱)</div>
+      <div className="sidebar-user">
+        <button type="button" className="signout-btn" onClick={signOut} title="Sign out">
+          <LogOut size={18} /> <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );

@@ -1,5 +1,7 @@
 import React from "react";
 import { SalonProvider, useSalon } from "./context/SalonContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Login from "./components/Login";
 import TabletShell from "./components/TabletShell";
 import Dashboard from "./components/Dashboard";
 import Appointments from "./components/Appointments";
@@ -41,13 +43,32 @@ const ActiveTabRenderer = () => {
   }
 };
 
-function App() {
+const AuthGate = () => {
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="login-screen">
+        <div className="login-loading">Loading…</div>
+      </div>
+    );
+  }
+  if (!session) return <Login />;
+
   return (
     <SalonProvider>
       <TabletShell>
         <ActiveTabRenderer />
       </TabletShell>
     </SalonProvider>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
   );
 }
 

@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -137,9 +138,13 @@ const StaffServiceTracking = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsRecordModalOpen(true)}>
-          <PlusCircle size={20} /> Record New Staff Service
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="staff-service-logs" label="Export Logs" rows={filteredTracking} columns={[{ label: "Log ID", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Stylist", value: (t) => t.staffName }, { label: "Client", value: (t) => t.clientName }, { label: "Service", value: (t) => t.serviceName }, { label: "Service Amount (PHP)", value: (t) => t.serviceAmount }, { label: "Commission Rate (%)", value: (t) => t.commissionRate }, { label: "Commission Earned (PHP)", value: (t) => t.commissionEarned }, { label: "Tip (PHP)", value: (t) => t.tipAmount || 0 }, { label: "Total Earnings (PHP)", value: (t) => t.totalEarnings }]} />
+          <ExportButton filename={`staff-performance-${selectedMonthFilter || "all"}`} label="Export Breakdown" rows={staffMonthlyStats} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.commissionRate }, { label: "Services Done", value: (r) => r.servicesDone }, { label: "Revenue (PHP)", value: (r) => r.totalRevenue }, { label: "Commission Earned (PHP)", value: (r) => r.totalCommission }, { label: "Tips (PHP)", value: (r) => r.totalTips }, { label: "Total Payout (PHP)", value: (r) => r.totalPayout }]} />
+          <button className="btn-primary" onClick={() => setIsRecordModalOpen(true)}>
+            <PlusCircle size={20} /> Record New Staff Service
+          </button>
+        </div>
       </div>
 
       {/* MONTHLY SUMMARY METRIC CARDS */}

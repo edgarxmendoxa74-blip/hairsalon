@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -98,15 +99,18 @@ const StaffManagement = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={openAdd}>
-          <PlusCircle size={20} /> Add New Staff Member
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="staff" rows={staff} columns={[{ label: "Staff ID", value: (m) => m.id }, { label: "Name", value: (m) => m.name }, { label: "Role", value: (m) => m.role }, { label: "Phone", value: (m) => m.phone }, { label: "Email", value: (m) => m.email }, { label: "Commission Rate (%)", value: (m) => m.commissionRate }, { label: "Specialties", value: (m) => (m.specialties || []).join('; ') }, { label: "Status", value: (m) => m.status }]} />
+          <button className="btn-primary" onClick={openAdd}>
+            <PlusCircle size={20} /> Add New Staff Member
+          </button>
+        </div>
       </div>
 
       {/* STAFF PROFILES GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
+      <div className="staff-grid">
         {staff.map((member) => (
-          <div key={member.id} className="glass-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div key={member.id} className="glass-card staff-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
                 <img

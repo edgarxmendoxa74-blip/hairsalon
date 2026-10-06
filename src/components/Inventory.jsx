@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -119,7 +120,7 @@ const Inventory = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="inventory-page" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       
       {/* HEADER BAR WITH ACTION BUTTONS */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
@@ -133,6 +134,11 @@ const Inventory = () => {
         </div>
 
         <div style={{ display: "flex", gap: "12px" }}>
+          {activeTabSub === "catalog" ? (
+            <ExportButton filename="inventory-catalog" rows={filteredInventory} columns={[{ label: "Product ID", value: (i) => i.id }, { label: "Name", value: (i) => i.name }, { label: "Category", value: (i) => i.category }, { label: "Unit", value: (i) => i.unit }, { label: "Current Stock", value: (i) => i.currentStock }, { label: "Min Threshold", value: (i) => i.minStockThreshold }, { label: "Status", value: (i) => (i.currentStock === 0 ? 'Out of Stock' : i.currentStock <= i.minStockThreshold ? 'Low Stock' : 'In Stock') }, { label: "Unit Cost (PHP)", value: (i) => i.unitCost }, { label: "Retail Price (PHP)", value: (i) => i.retailPrice }, { label: "Supplier", value: (i) => i.supplier }]} />
+          ) : (
+            <ExportButton filename="inventory-movements" label="Export Log" rows={inventoryLogs} columns={[{ label: "Log ID", value: (l) => l.id }, { label: "Date & Time", value: (l) => l.date }, { label: "Product", value: (l) => l.productName }, { label: "Type", value: (l) => l.type }, { label: "Quantity", value: (l) => l.quantity }, { label: "Previous Stock", value: (l) => l.previousStock }, { label: "New Stock", value: (l) => l.newStock }, { label: "Handled By", value: (l) => l.staffName }, { label: "Reason", value: (l) => l.reason }]} />
+          )}
           <button className="btn-secondary" onClick={() => quickRestockLowStockItems(10)}>
             <Zap size={18} color="#f59e0b" /> Restock Low Stock (+10)
           </button>

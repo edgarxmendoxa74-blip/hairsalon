@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -72,9 +73,12 @@ const Services = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={openAdd}>
-          <PlusCircle size={20} /> Add New Service
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="services" rows={filteredServices} columns={[{ label: "Service ID", value: (v) => v.id }, { label: "Name", value: (v) => v.name }, { label: "Category", value: (v) => v.category }, { label: "Price (PHP)", value: (v) => v.price }, { label: "Duration (min)", value: (v) => v.duration }, { label: "Description", value: (v) => v.description }]} />
+          <button className="btn-primary" onClick={openAdd}>
+            <PlusCircle size={20} /> Add New Service
+          </button>
+        </div>
       </div>
 
       {/* CATEGORY FILTER PILLS */}
@@ -94,9 +98,9 @@ const Services = () => {
       </div>
 
       {/* SERVICE CATALOG CARDS GRID */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+      <div className="service-grid">
         {filteredServices.map((srv) => (
-          <div key={srv.id} className="glass-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div key={srv.id} className="glass-card service-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
                 <span className="status-badge active" style={{ fontSize: "11px", background: "rgba(138, 111, 124, 0.18)", color: "#6b5566", border: "1px solid rgba(138, 111, 124, 0.4)" }}>

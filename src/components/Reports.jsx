@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -45,6 +46,15 @@ const Reports = () => {
     }
   });
 
+  // Payout report rows (shared by the table and the CSV export)
+  const payoutRows = staff.map((stf) => {
+        const logs = monthlyTracking.filter((t) => t.staffId === stf.id);
+        const revenue = logs.reduce((a, t) => a + t.serviceAmount, 0);
+        const comm = logs.reduce((a, t) => a + t.commissionEarned, 0);
+        const tips = logs.reduce((a, t) => a + (t.tipAmount || 0), 0);
+        return { id: stf.id, name: stf.name, role: stf.role, rate: stf.commissionRate, count: logs.length, revenue, comm, tips, payout: comm + tips };
+  });
+
   // Total inventory value
   const totalInventoryValuation = inventory.reduce((acc, i) => acc + i.currentStock * i.unitCost, 0);
   const lowStockCount = inventory.filter((i) => i.currentStock <= i.minStockThreshold).length;
@@ -75,6 +85,8 @@ const Reports = () => {
             />
           </div>
 
+          <ExportButton small filename={`sales-${selectedMonth}`} label="Export Sales" rows={monthlySales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Total (PHP)", value: (t) => t.total }]} />
+          <ExportButton small filename={`payout-report-${selectedMonth}`} label="Export Payout" rows={payoutRows} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.rate }, { label: "Services Done", value: (r) => r.count }, { label: "Service Revenue (PHP)", value: (r) => r.revenue }, { label: "Commission Earned (PHP)", value: (r) => r.comm }, { label: "Tips (PHP)", value: (r) => r.tips }, { label: "Total Payout (PHP)", value: (r) => r.payout }]} />
           <button className="btn-secondary" onClick={() => window.print()}>
             <Printer size={16} /> Print Report
           </button>
@@ -194,16 +206,11 @@ const Reports = () => {
         </h3>
 
         {(() => {
-          const rows = staff.map((stf) => {
-            const logs = monthlyTracking.filter((t) => t.staffId === stf.id);
-            const revenue = logs.reduce((a, t) => a + t.serviceAmount, 0);
-            const comm = logs.reduce((a, t) => a + t.commissionEarned, 0);
-            const tips = logs.reduce((a, t) => a + (t.tipAmount || 0), 0);
-            return { id: stf.id, name: stf.name, role: stf.role, rate: stf.commissionRate, count: logs.length, revenue, comm, tips, payout: comm + tips };
-          });
+          const rows = payoutRows;
           const sum = (k) => rows.reduce((a, r) => a + r[k], 0);
           const peso = (n) => `₱${n.toLocaleString()}`;
           return (
+            <>
             <ExcelSheet
               columns={[
                 { key: "name", label: "Stylist Name", style: { fontWeight: 700 } },
@@ -218,6 +225,7 @@ const Reports = () => {
               rows={rows}
               totals={{ name: "TOTAL", count: sum("count"), revenue: peso(sum("revenue")), comm: peso(sum("comm")), tips: peso(sum("tips")), payout: peso(sum("payout")) }}
             />
+            </>
           );
         })()}
       </div>

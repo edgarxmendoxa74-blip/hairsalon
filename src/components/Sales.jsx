@@ -1,3 +1,4 @@
+import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -85,9 +86,12 @@ const Sales = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsPOSModalOpen(true)}>
-          <ShoppingBag size={20} /> New POS Transaction
-        </button>
+        <div className="header-actions">
+          <ExportButton filename="sales" rows={filteredSales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Items", value: (t) => t.items.map((i) => i.name + ' (x' + i.qty + ')').join('; ') }, { label: "Subtotal (PHP)", value: (t) => t.subtotal }, { label: "Discount (PHP)", value: (t) => t.discount }, { label: "Tax (PHP)", value: (t) => t.tax }, { label: "Total Paid (PHP)", value: (t) => t.total }]} />
+          <button className="btn-primary" onClick={() => setIsPOSModalOpen(true)}>
+            <ShoppingBag size={20} /> New POS Transaction
+          </button>
+        </div>
       </div>
 
       {/* SEARCH REGISTER */}
