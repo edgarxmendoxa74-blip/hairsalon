@@ -12,7 +12,8 @@ import {
   CreditCard,
   BarChart3,
   LogOut,
-  LineChart
+  LineChart,
+  MessageSquare
 } from "lucide-react";
 
 const Navigation = () => {
@@ -29,6 +30,7 @@ const Navigation = () => {
     { id: "inventory", label: "Inventory", icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeClass: "alert", highlight: true }, // Main focus
     { id: "sales", label: "Sales & POS", icon: CreditCard },
     { id: "analytics", label: "Analytics", icon: LineChart },
+    { id: "sms", label: "SMS", icon: MessageSquare },
     { id: "reports", label: "Reports", icon: BarChart3 }
   ];
 

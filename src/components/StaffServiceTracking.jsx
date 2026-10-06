@@ -1,6 +1,7 @@
 import ExportButton from "./ExportButton";
+import CategoryChips from "./CategoryChips";
 import ExcelSheet from "./ExcelSheet";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
   Award,
@@ -12,7 +13,9 @@ import {
   CheckCircle,
   Package,
   Calendar,
-  Filter
+  Filter,
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
 
 const StaffServiceTracking = () => {
@@ -28,10 +31,17 @@ const StaffServiceTracking = () => {
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStaffFilter, setSelectedStaffFilter] = useState("ALL");
+  const [logCategory, setLogCategory] = useState("ALL");
+  const categoryOfLog = (trk) => services.find((sv) => sv.id === trk.serviceId)?.category || "Other";
   const [selectedMonthFilter, setSelectedMonthFilter] = useState(new Date().toISOString().slice(0, 7)); // e.g. "2026-10"
 
   // Modal State
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  // The record modal has two pages: 1) service details, 2) review, options and notes
+  const [recordStep, setRecordStep] = useState(1);
+  useEffect(() => {
+    if (!isRecordModalOpen) setRecordStep(1);
+  }, [isRecordModalOpen]);
   const [formData, setFormData] = useState({
     staffId: staff[0]?.id || "",
     clientId: clients[0]?.id || "",
@@ -74,6 +84,10 @@ const StaffServiceTracking = () => {
 
   const handleRecordSubmit = (e) => {
     e.preventDefault();
+    if (recordStep === 1) {
+      setRecordStep(2);
+      return;
+    }
     recordStaffService({
       staffId: formData.staffId,
       clientId: formData.clientId,
@@ -97,8 +111,16 @@ const StaffServiceTracking = () => {
       trk.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trk.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trk.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesMonth && matchesStaff && matchesSearch;
+    const matchesCategory = logCategory === "ALL" ? true : categoryOfLog(trk) === logCategory;
+    return matchesMonth && matchesStaff && matchesSearch && matchesCategory;
   });
+
+  const logCategories = (() => {
+    const base = staffTracking.filter((trk) => (selectedMonthFilter ? trk.date.slice(0, 7) === selectedMonthFilter : true));
+    const counts = {};
+    base.forEach((trk) => { const k = categoryOfLog(trk); counts[k] = (counts[k] || 0) + 1; });
+    return [{ key: "ALL", label: "All", count: base.length }, ...Object.keys(counts).sort().map((k) => ({ key: k, label: k, count: counts[k] }))];
+  })();
 
   // Aggregate monthly stats per staff member
   const staffMonthlyStats = staff.map((stf) => {
@@ -261,6 +283,10 @@ const StaffServiceTracking = () => {
           </div>
         </div>
 
+        <div style={{ marginBottom: "12px" }}>
+          <CategoryChips label="Service category" options={logCategories} value={logCategory} onChange={setLogCategory} />
+        </div>
+
         {filteredTracking.length === 0 ? (
           <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
             No recorded staff services match the selected filter.
@@ -286,10 +312,10 @@ const StaffServiceTracking = () => {
       {/* RECORD NEW STAFF SERVICE MODAL */}
       {isRecordModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content pos-modal">
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Award color="var(--accent-rose)" size={20} /> Record Completed Staff Service
+                <Award size={20} /> Record Completed Staff Service
               </h3>
               <button
                 onClick={() => setIsRecordModalOpen(false)}
@@ -299,8 +325,15 @@ const StaffServiceTracking = () => {
               </button>
             </div>
 
+            <div className="pos-steps">
+              <div className={`pos-step ${recordStep === 1 ? "active" : "done"}`}><span>1</span> Service Details</div>
+              <div className="pos-step-line" />
+              <div className={`pos-step ${recordStep === 2 ? "active" : ""}`}><span>2</span> Review & Notes</div>
+            </div>
+
             <form onSubmit={handleRecordSubmit}>
               <div className="modal-body">
+                {recordStep === 1 && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   
                   {/* Select Staff Member */}
@@ -389,6 +422,24 @@ const StaffServiceTracking = () => {
                     />
                   </div>
                 </div>
+                )}
+
+                {recordStep === 2 && (
+                <>
+                {/* Summary of page 1 */}
+                {(() => {
+                  const selStaff = staff.find((x) => x.id === formData.staffId);
+                  const selClient = clients.find((x) => x.id === formData.clientId);
+                  const selService = services.find((x) => x.id === formData.serviceId);
+                  return (
+                    <div className="pos-totals" style={{ marginBottom: "12px" }}>
+                      <div><span>Stylist</span><strong>{selStaff ? selStaff.name : "—"}</strong></div>
+                      <div><span>Client</span><strong>{selClient ? selClient.name : "—"}</strong></div>
+                      <div><span>Service</span><strong>{selService ? selService.name : "—"}</strong></div>
+                      <div><span>Service Price</span><strong>₱{Number(formData.serviceAmount || 0).toLocaleString()}</strong></div>
+                    </div>
+                  );
+                })()}
 
                 {/* Calculation Preview Banner */}
                 {(() => {
@@ -452,16 +503,31 @@ const StaffServiceTracking = () => {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   />
                 </div>
+                </>
+                )}
 
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setIsRecordModalOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary">
-                  <CheckCircle size={18} /> Confirm & Save Service Record
-                </button>
+                {recordStep === 1 ? (
+                  <>
+                    <button type="button" className="btn-secondary" onClick={() => setIsRecordModalOpen(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary">
+                      Next: Review <ArrowRight size={18} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn-secondary" onClick={() => setRecordStep(1)}>
+                      <ArrowLeft size={18} /> Back
+                    </button>
+                    <button type="submit" className="btn-primary">
+                      <CheckCircle size={18} /> Confirm & Save Service Record
+                    </button>
+                  </>
+                )}
               </div>
             </form>
 

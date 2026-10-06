@@ -1,5 +1,6 @@
 import ExportButton from "./ExportButton";
-import React, { useState } from "react";
+import CategoryChips, { buildOptions } from "./CategoryChips";
+import React, { useState, useEffect } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
   CreditCard,
@@ -10,7 +11,9 @@ import {
   CheckCircle,
   ShoppingBag,
   Trash2,
-  Sparkles
+  Sparkles,
+  ArrowRight,
+  ArrowLeft
 } from "lucide-react";
 
 const Sales = () => {
@@ -26,11 +29,22 @@ const Sales = () => {
   const [discountAmt, setDiscountAmt] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("GCash");
 
+  const [paymentFilter, setPaymentFilter] = useState("ALL");
+
+  // POS modal is split into two pages: 1) client + items, 2) review + payment
+  const [posStep, setPosStep] = useState(1);
+  const [posTab, setPosTab] = useState("services");
+  useEffect(() => {
+    if (!isPOSModalOpen) { setPosStep(1); setPosTab("services"); }
+  }, [isPOSModalOpen]);
+  const paymentOptions = buildOptions(sales, (s) => s.paymentMethod);
+
   const filteredSales = sales.filter(
     (s) =>
-      s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase())
+      (paymentFilter === "ALL" || s.paymentMethod === paymentFilter) &&
+      (s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const addServiceToCart = (srv) => {
@@ -57,6 +71,10 @@ const Sales = () => {
   const handlePOSSubmit = (e) => {
     e.preventDefault();
     if (cartItems.length === 0) return;
+    if (posStep === 1) {
+      setPosStep(2);
+      return;
+    }
 
     const newSale = recordPOSSale({
       clientId: posClientId,
@@ -108,6 +126,8 @@ const Sales = () => {
           />
         </div>
       </div>
+
+      <CategoryChips label="Payment method" options={paymentOptions} value={paymentFilter} onChange={setPaymentFilter} />
 
       {/* SALES REGISTER TABLE */}
       <div className="glass-card">
@@ -165,30 +185,30 @@ const Sales = () => {
         </div>
       </div>
 
-      {/* MODAL 1: NEW POS TRANSACTION */}
+      {/* MODAL 1: NEW POS TRANSACTION (2 pages) */}
       {isPOSModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: "800px" }}>
+          <div className="modal-content pos-modal">
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <ShoppingBag size={20} color="var(--accent-rose)" /> Fix Salon Point-of-Sale Register
+                <ShoppingBag size={20} /> Fix Salon Point-of-Sale Register
               </h3>
-              <button onClick={() => setIsPOSModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <button type="button" onClick={() => setIsPOSModalOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "20px" }}>✕</button>
+            </div>
+
+            <div className="pos-steps">
+              <div className={`pos-step ${posStep === 1 ? "active" : "done"}`}><span>1</span> Client & Items</div>
+              <div className="pos-step-line" />
+              <div className={`pos-step ${posStep === 2 ? "active" : ""}`}><span>2</span> Review & Payment</div>
             </div>
 
             <form onSubmit={handlePOSSubmit}>
               <div className="modal-body">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                  
-                  {/* Left Column: Selector */}
-                  <div>
+                {posStep === 1 ? (
+                  <div className="pos-page">
                     <div className="form-group">
                       <label>Select Client</label>
-                      <select
-                        className="form-control"
-                        value={posClientId}
-                        onChange={(e) => setPosClientId(e.target.value)}
-                      >
+                      <select className="form-control" value={posClientId} onChange={(e) => setPosClientId(e.target.value)}>
                         <option value="">Walk-in Customer</option>
                         {clients.map((c) => (
                           <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
@@ -196,110 +216,92 @@ const Sales = () => {
                       </select>
                     </div>
 
-                    <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)", display: "block", marginBottom: "8px" }}>
-                      Quick Add Services:
-                    </label>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "140px", overflowY: "auto", marginBottom: "16px" }}>
-                      {services.map((srv) => (
-                        <button
-                          key={srv.id}
-                          type="button"
-                          className="btn-secondary"
-                          style={{ justifyContent: "space-between", height: "36px", fontSize: "12px" }}
-                          onClick={() => addServiceToCart(srv)}
-                        >
-                          <span>{srv.name}</span>
-                          <strong style={{ color: "var(--accent-rose)" }}>+₱{srv.price}</strong>
-                        </button>
-                      ))}
+                    <div className="pos-tabs">
+                      <button type="button" className={posTab === "services" ? "active" : ""} onClick={() => setPosTab("services")}>Services ({services.length})</button>
+                      <button type="button" className={posTab === "products" ? "active" : ""} onClick={() => setPosTab("products")}>Retail Products ({inventory.length})</button>
                     </div>
 
-                    <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-muted)", display: "block", marginBottom: "8px" }}>
-                      Quick Add Retail Products:
-                    </label>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "140px", overflowY: "auto" }}>
-                      {inventory.map((prod) => (
-                        <button
-                          key={prod.id}
-                          type="button"
-                          className="btn-secondary"
-                          style={{ justifyContent: "space-between", height: "36px", fontSize: "12px" }}
-                          onClick={() => addProductToCart(prod)}
-                        >
-                          <span>{prod.name}</span>
-                          <strong style={{ color: "#4d7a4a" }}>+₱{prod.retailPrice || prod.unitCost}</strong>
-                        </button>
-                      ))}
+                    <div className="pos-picker">
+                      {posTab === "services"
+                        ? services.map((srv) => (
+                            <button key={srv.id} type="button" className="pos-pick" onClick={() => addServiceToCart(srv)}>
+                              <span className="pos-pick-name">{srv.name}</span>
+                              <strong className="pos-pick-price">+₱{srv.price.toLocaleString()}</strong>
+                            </button>
+                          ))
+                        : inventory.map((prod) => (
+                            <button key={prod.id} type="button" className="pos-pick" onClick={() => addProductToCart(prod)}>
+                              <span className="pos-pick-name">{prod.name}</span>
+                              <strong className="pos-pick-price">+₱{(prod.retailPrice || prod.unitCost).toLocaleString()}</strong>
+                            </button>
+                          ))}
+                    </div>
+
+                    <div className="pos-cart-bar">
+                      <span>{cartItems.length} item{cartItems.length === 1 ? "" : "s"} added</span>
+                      <strong>₱{cartSubtotal.toLocaleString()}</strong>
                     </div>
                   </div>
-
-                  {/* Right Column: Cart & Payment */}
-                  <div style={{ background: "var(--bg-secondary)", padding: "16px", borderRadius: "14px", border: "1px solid var(--border-color)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <div>
-                      <h4 style={{ fontSize: "15px", marginBottom: "12px" }}>Selected Order Items</h4>
-                      {cartItems.length === 0 ? (
-                        <div style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
-                          No items added to cart yet.
+                ) : (
+                  <div className="pos-page">
+                    <h4 className="pos-section-title">Order Items</h4>
+                    <div className="pos-cart-list">
+                      {cartItems.map((item, idx) => (
+                        <div key={idx} className="pos-cart-row">
+                          <div className="pos-cart-info">
+                            <div className="pos-cart-name">{item.name}</div>
+                            <div className="pos-cart-type">{item.type}</div>
+                          </div>
+                          <strong>₱{(item.price * item.qty).toLocaleString()}</strong>
+                          <button type="button" className="icon-btn danger" title="Remove" onClick={() => removeFromCart(idx)}>
+                            <Trash2 size={14} />
+                          </button>
                         </div>
-                      ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "180px", overflowY: "auto", marginBottom: "16px" }}>
-                          {cartItems.map((item, idx) => (
-                            <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-input)", padding: "8px 12px", borderRadius: "8px", fontSize: "13px" }}>
-                              <div>
-                                <div style={{ fontWeight: 600 }}>{item.name}</div>
-                                <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{item.type}</div>
-                              </div>
-                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                <strong>₱{item.price.toLocaleString()}</strong>
-                                <button type="button" onClick={() => removeFromCart(idx)} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>✕</button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      ))}
                     </div>
 
-                    <div>
+                    <div className="pos-pay-grid">
                       <div className="form-group">
                         <label>Discount Amount (₱)</label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={discountAmt}
-                          onChange={(e) => setDiscountAmt(e.target.value)}
-                        />
+                        <input type="number" min="0" className="form-control" value={discountAmt} onChange={(e) => setDiscountAmt(e.target.value)} />
                       </div>
-
                       <div className="form-group">
                         <label>Payment Method *</label>
-                        <select
-                          className="form-control"
-                          value={paymentMethod}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                        >
+                        <select className="form-control" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
                           <option value="Cash">Cash</option>
                           <option value="GCash">GCash / Maya</option>
                           <option value="Card">Credit / Debit Card</option>
                         </select>
                       </div>
+                    </div>
 
-                      <div style={{ background: "rgba(16, 185, 129, 0.15)", padding: "12px", borderRadius: "10px", marginTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 600 }}>Total Payable:</span>
-                        <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--accent-emerald)" }}>
-                          ₱{cartTotal.toLocaleString()}
-                        </span>
-                      </div>
+                    <div className="pos-totals">
+                      <div><span>Subtotal</span><span>₱{cartSubtotal.toLocaleString()}</span></div>
+                      <div><span>Discount</span><span>−₱{Number(discountAmt || 0).toLocaleString()}</span></div>
+                      <div className="pos-total-final"><span>Total Payable</span><span>₱{cartTotal.toLocaleString()}</span></div>
                     </div>
                   </div>
-
-                </div>
+                )}
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setIsPOSModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" disabled={cartItems.length === 0}>
-                  <CheckCircle size={18} /> Process Payment & Complete
-                </button>
+                {posStep === 1 ? (
+                  <>
+                    <button type="button" className="btn-secondary" onClick={() => setIsPOSModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={cartItems.length === 0}>
+                      Next: Review Order <ArrowRight size={18} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn-secondary" onClick={() => setPosStep(1)}>
+                      <ArrowLeft size={18} /> Back
+                    </button>
+                    <button type="submit" className="btn-primary" disabled={cartItems.length === 0}>
+                      <CheckCircle size={18} /> Process Payment & Complete
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           </div>

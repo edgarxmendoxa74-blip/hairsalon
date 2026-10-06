@@ -1,4 +1,6 @@
 import ExportButton from "./ExportButton";
+import CategorySlider from "./CategorySlider";
+import { loadCustomCategories, saveCustomCategories } from "../utils/serviceCategories";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -15,7 +17,39 @@ import {
 } from "lucide-react";
 
 const StaffManagement = () => {
-  const { staff, addStaff, updateStaff, deleteStaff } = useSalon();
+  const { staff, services, addStaff, updateStaff, deleteStaff } = useSalon();
+  const [staffCategory, setStaffCategory] = useState("ALL");
+
+  // A stylist belongs to every service category they are assigned to
+  const staffCategoriesOf = (member) => [...new Set(services.filter((sv) => (sv.assignedStaff || []).includes(member.id)).map((sv) => sv.category))];
+  const [customCategories, setCustomCategories] = useState(loadCustomCategories);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const categoryNames = [...new Set([...services.map((sv) => sv.category), ...customCategories])].filter(Boolean).sort();
+  const staffCategories = categoryNames.map((k) => {
+    const count = staff.filter((m) => staffCategoriesOf(m).includes(k)).length;
+    return { key: k, label: k, count, removable: customCategories.includes(k) && !services.some((sv) => sv.category === k) };
+  });
+
+  const addCategory = (name) => {
+    const existing = categoryNames.find((c) => c.toLowerCase() === name.toLowerCase());
+    if (!existing) {
+      const next = [...customCategories, name];
+      setCustomCategories(next);
+      saveCustomCategories(next);
+    }
+    setStaffCategory(existing || name);
+    setIsAddingCategory(false);
+  };
+
+  const removeCategory = (cat) => {
+    if (window.confirm('Remove the empty category "' + cat + '"?')) {
+      const next = customCategories.filter((c) => c !== cat);
+      setCustomCategories(next);
+      saveCustomCategories(next);
+      if (staffCategory === cat) setStaffCategory("ALL");
+    }
+  };
+  const visibleStaff = staffCategory === "ALL" ? staff : staff.filter((m) => staffCategoriesOf(m).includes(staffCategory));
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -101,15 +135,28 @@ const StaffManagement = () => {
 
         <div className="header-actions">
           <ExportButton filename="staff" rows={staff} columns={[{ label: "Staff ID", value: (m) => m.id }, { label: "Name", value: (m) => m.name }, { label: "Role", value: (m) => m.role }, { label: "Phone", value: (m) => m.phone }, { label: "Email", value: (m) => m.email }, { label: "Commission Rate (%)", value: (m) => m.commissionRate }, { label: "Specialties", value: (m) => (m.specialties || []).join('; ') }, { label: "Status", value: (m) => m.status }]} />
+          <button type="button" className="btn-secondary" onClick={() => setIsAddingCategory(true)}>
+            <PlusCircle size={18} /> Add Category
+          </button>
           <button className="btn-primary" onClick={openAdd}>
             <PlusCircle size={20} /> Add New Staff Member
           </button>
         </div>
       </div>
 
+      <CategorySlider
+        items={staffCategories}
+        value={staffCategory}
+        onToggle={(cat) => setStaffCategory(staffCategory === cat ? "ALL" : cat)}
+        onRemove={removeCategory}
+        adding={isAddingCategory}
+        onAdd={addCategory}
+        onCancelAdd={() => setIsAddingCategory(false)}
+      />
+
       {/* STAFF PROFILES GRID */}
       <div className="staff-grid">
-        {staff.map((member) => (
+        {visibleStaff.map((member) => (
           <div key={member.id} className="glass-card staff-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>

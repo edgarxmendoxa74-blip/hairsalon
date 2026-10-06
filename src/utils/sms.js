@@ -7,13 +7,13 @@ export const toPhNumber = (phone = "") => {
   return d ? "+" + d : "";
 };
 
-const formatTime = (t = "") => {
+export const formatTime = (t = "") => {
   const [h, m] = t.split(":").map(Number);
   if (Number.isNaN(h)) return t;
   return `${((h + 11) % 12) + 1}:${String(m || 0).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
 };
 
-const formatDate = (d = "") => {
+export const formatDate = (d = "") => {
   const dt = new Date(d + "T00:00:00");
   return Number.isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 };

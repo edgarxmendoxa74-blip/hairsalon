@@ -56,6 +56,7 @@ const TabletShell = ({ children }) => {
       case "tracking": return "Staff Service Tracking & Performance";
       case "inventory": return "Inventory & Stock Control";
       case "sales": return "POS & Transaction Register";
+      case "sms": return "SMS Center";
       case "analytics": return "Analytics & Trends";
       case "reports": return "Reports & Analytics";
       default: return "Salon Management";

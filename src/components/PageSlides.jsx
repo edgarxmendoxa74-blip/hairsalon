@@ -42,6 +42,11 @@ const SLIDES = {
     { title: "Flexible Payments", text: "Record cash and other payment methods with ease." },
     { title: "Transaction Register", text: "Review every sale made today." }
   ],
+  sms: [
+    { title: "SMS Center", text: "Pick customers, write a message, and send it from this device." },
+    { title: "Personalised", text: "Use {name}, {date}, {time} and {service} to fill in each customer's details." },
+    { title: "Private", text: "Each message is sent separately, so no one sees other customers." }
+  ],
   analytics: [
     { title: "Analytics", text: "Trends and top performers across your whole salon." },
     { title: "Weekly Revenue", text: "See how the last 7 days compare." },

@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import CategoryChips from "./CategoryChips";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -29,11 +30,23 @@ const Clients = () => {
     vip: false
   });
 
+  const [clientCategory, setClientCategory] = useState("ALL");
+  const clientCategoryOf = {
+    VIP: (c) => c.vip,
+    Regular: (c) => !c.vip,
+    "With treatment notes": (c) => (c.treatmentRecords || []).length > 0
+  };
+  const clientCategories = [
+    { key: "ALL", label: "All", count: clients.length },
+    ...Object.entries(clientCategoryOf).map(([k, fn]) => ({ key: k, label: k, count: clients.filter(fn).length }))
+  ];
+
   const filteredClients = clients.filter(
     (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (clientCategory === "ALL" || clientCategoryOf[clientCategory](c)) &&
+      (c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const openAdd = () => {
@@ -106,6 +119,8 @@ const Clients = () => {
           />
         </div>
       </div>
+
+      <CategoryChips label="Category" options={clientCategories} value={clientCategory} onChange={setClientCategory} />
 
       {/* CLIENT CARDS GRID */}
       <div className="client-grid">

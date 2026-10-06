@@ -13,6 +13,7 @@ import Inventory from "./components/Inventory";
 import Sales from "./components/Sales";
 import Reports from "./components/Reports";
 import Analytics from "./components/Analytics";
+import SmsCenter from "./components/SmsCenter";
 
 const ActiveTabRenderer = () => {
   const { activeTab } = useSalon();
@@ -34,6 +35,8 @@ const ActiveTabRenderer = () => {
       return <Inventory />;
     case "sales":
       return <Sales />;
+    case "sms":
+      return <SmsCenter />;
     case "analytics":
       return <Analytics />;
     case "reports":

@@ -1,5 +1,7 @@
 import ExportButton from "./ExportButton";
 import React, { useState } from "react";
+import CategorySlider from "./CategorySlider";
+import { loadCustomCategories, saveCustomCategories as persistCategories } from "../utils/serviceCategories";
 import { useSalon } from "../context/SalonContext";
 import {
   Scissors,
@@ -28,19 +30,45 @@ const Services = () => {
   };
   const [formData, setFormData] = useState({ ...emptyForm });
 
-  const categories = ["ALL", ...new Set(services.map((s) => s.category))];
+  // Categories created here stay even before a service uses them
+  const [customCategories, setCustomCategories] = useState(loadCustomCategories);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [isNewCategoryInForm, setIsNewCategoryInForm] = useState(false);
+
+  const allCategories = [...new Set([...services.map((s) => s.category), ...customCategories])].filter(Boolean);
+
+  const saveCustomCategories = (list) => {
+    setCustomCategories(list);
+    persistCategories(list);
+  };
+
+  const addCategory = (name) => {
+    const existing = allCategories.find((c) => c.toLowerCase() === name.toLowerCase());
+    if (!existing) saveCustomCategories([...customCategories, name]);
+    setSelectedCategory(existing || name);
+    setIsAddingCategory(false);
+  };
+
+  const removeCategory = (cat) => {
+    if (window.confirm('Remove the empty category "' + cat + '"?')) {
+      saveCustomCategories(customCategories.filter((c) => c !== cat));
+      if (selectedCategory === cat) setSelectedCategory("ALL");
+    }
+  };
 
   const filteredServices = services.filter(
     (s) => selectedCategory === "ALL" || s.category === selectedCategory
   );
 
   const openAdd = () => {
+    setIsNewCategoryInForm(false);
     setEditingId(null);
     setFormData({ ...emptyForm });
     setIsAddModalOpen(true);
   };
 
   const openEdit = (srv) => {
+    setIsNewCategoryInForm(false);
     setEditingId(srv.id);
     setFormData({ ...emptyForm, ...srv });
     setIsAddModalOpen(true);
@@ -52,8 +80,13 @@ const Services = () => {
 
   const handleCreateSubmit = (e) => {
     e.preventDefault();
-    if (editingId) updateService(editingId, formData);
-    else addService(formData);
+    const category = (formData.category || "").trim();
+    const known = allCategories.find((c) => c.toLowerCase() === category.toLowerCase());
+    const payload = { ...formData, category: known || category };
+    if (!known && category) saveCustomCategories([...customCategories, category]);
+    if (editingId) updateService(editingId, payload);
+    else addService(payload);
+    setIsNewCategoryInForm(false);
     setEditingId(null);
     setIsAddModalOpen(false);
     setFormData({ ...emptyForm });
@@ -75,30 +108,31 @@ const Services = () => {
 
         <div className="header-actions">
           <ExportButton filename="services" rows={filteredServices} columns={[{ label: "Service ID", value: (v) => v.id }, { label: "Name", value: (v) => v.name }, { label: "Category", value: (v) => v.category }, { label: "Price (PHP)", value: (v) => v.price }, { label: "Duration (min)", value: (v) => v.duration }, { label: "Description", value: (v) => v.description }]} />
+          <button type="button" className="btn-secondary" onClick={() => setIsAddingCategory(true)}>
+            <PlusCircle size={18} /> Add Category
+          </button>
           <button className="btn-primary" onClick={openAdd}>
             <PlusCircle size={20} /> Add New Service
           </button>
         </div>
       </div>
 
-      {/* CATEGORY FILTER PILLS */}
-      <div className="glass-card" style={{ padding: "14px" }}>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className={`btn-secondary ${selectedCategory === cat ? "btn-primary" : ""}`}
-              style={{ height: "38px", fontSize: "13px" }}
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {cat === "ALL" ? "All Categories" : cat}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* CATEGORY SLIDER */}
+      <CategorySlider
+        items={allCategories.map((cat) => {
+          const count = services.filter((sv) => sv.category === cat).length;
+          return { key: cat, label: cat, count, removable: customCategories.includes(cat) && count === 0 };
+        })}
+        value={selectedCategory}
+        onToggle={(cat) => setSelectedCategory(selectedCategory === cat ? "ALL" : cat)}
+        onRemove={removeCategory}
+        adding={isAddingCategory}
+        onAdd={addCategory}
+        onCancelAdd={() => setIsAddingCategory(false)}
+      />
 
       {/* SERVICE CATALOG CARDS GRID */}
-      <div className="service-grid">
+      <div key={selectedCategory} className="service-grid slide-in">
         {filteredServices.map((srv) => (
           <div key={srv.id} className="glass-card service-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
@@ -175,14 +209,34 @@ const Services = () => {
 
                   <div className="form-group">
                     <label>Category *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Hair Care, Nail Care, Barber..."
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      required
-                    />
+                    {isNewCategoryInForm ? (
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <input
+                          autoFocus
+                          type="text"
+                          className="form-control"
+                          placeholder="New category name"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          required
+                        />
+                        <button type="button" className="btn-secondary" onClick={() => { setIsNewCategoryInForm(false); setFormData({ ...formData, category: allCategories[0] || "" }); }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <select
+                        className="form-control"
+                        value={allCategories.includes(formData.category) ? formData.category : ""}
+                        onChange={(e) => {
+                          if (e.target.value === "__new") { setIsNewCategoryInForm(true); setFormData({ ...formData, category: "" }); }
+                          else setFormData({ ...formData, category: e.target.value });
+                        }}
+                        required
+                      >
+                        {!allCategories.includes(formData.category) && <option value="" disabled>Select category</option>}
+                        {allCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+                        <option value="__new">+ Add new category…</option>
+                      </select>
+                    )}
                   </div>
 
                   <div className="form-group">
