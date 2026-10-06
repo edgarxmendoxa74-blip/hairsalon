@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import { MessageSquare, Search, Send, Copy, CheckCircle2, Users, Star } from "lucide-react";
-import { toPhNumber, smsLink, copyText, formatDate, formatTime } from "../utils/sms";
+import { toPhNumber, smsLink, whatsappLink, copyText, formatDate, formatTime } from "../utils/sms";
 
 const TEMPLATES = {
   confirm: {
@@ -87,6 +87,11 @@ const SmsCenter = () => {
 
   const sendOne = (r) => {
     window.location.href = smsLink(r.number, r.text);
+    markSent(r.client.id);
+  };
+
+  const whatsappOne = (r) => {
+    window.open(whatsappLink(r.number, r.text), "_blank", "noopener");
     markSent(r.client.id);
   };
 
@@ -219,6 +224,7 @@ const SmsCenter = () => {
                         ) : (
                           <div style={{ display: "flex", gap: "6px" }}>
                             <button type="button" className="icon-btn" title="Copy message" onClick={() => copyOne(r)}><Copy size={14} /></button>
+                            <button type="button" className="btn-secondary btn-export-sm" title="Open in WhatsApp" onClick={() => whatsappOne(r)}>WhatsApp</button>
                             <button type="button" className="btn-primary btn-export-sm" onClick={() => sendOne(r)}><Send size={13} /> Send</button>
                           </div>
                         )}

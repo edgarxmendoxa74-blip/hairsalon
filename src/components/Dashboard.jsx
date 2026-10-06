@@ -1,4 +1,5 @@
 import React from "react";
+import { useCurrency } from "../context/CurrencyContext";
 import { useSalon } from "../context/SalonContext";
 import {
   DollarSign,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
+  const { money } = useCurrency();
   const {
     sales,
     appointments,
@@ -92,9 +94,9 @@ const Dashboard = () => {
           </div>
           <div className="stat-info">
             <div className="label">Today's Sales Revenue</div>
-            <div className="value">₱{totalSalesToday.toLocaleString()}</div>
+            <div className="value">{money(totalSalesToday)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-emerald)", marginTop: "2px", fontWeight: 600 }}>
-              Monthly: ₱{monthlySalesTotal.toLocaleString()}
+              Monthly: {money(monthlySalesTotal)}
             </div>
           </div>
         </div>
@@ -135,7 +137,7 @@ const Dashboard = () => {
               {topStaffEntry ? topStaffEntry[0] : "N/A"}
             </div>
             <div style={{ fontSize: "12px", color: "var(--accent-rose)", marginTop: "2px", fontWeight: 600 }}>
-              {topStaffEntry ? `₱${topStaffEntry[1].revenue.toLocaleString()} Revenue` : "No activity"}
+              {topStaffEntry ? `${money(topStaffEntry[1].revenue)} Revenue` : "No activity"}
             </div>
           </div>
         </div>
@@ -231,7 +233,7 @@ const Dashboard = () => {
                       {apt.status}
                     </span>
                     <span style={{ fontWeight: 700, color: "var(--text-main)", fontSize: "14px" }}>
-                      ₱{apt.amount.toLocaleString()}
+                      {money(apt.amount)}
                     </span>
                   </div>
                 </div>
@@ -265,10 +267,10 @@ const Dashboard = () => {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
                   <span style={{ color: "var(--accent-rose)" }}>{trk.staffName}</span>
-                  <span style={{ color: "var(--accent-emerald)" }}>+₱{trk.commissionEarned} Comm.</span>
+                  <span style={{ color: "var(--accent-emerald)" }}>+{money(trk.commissionEarned)} Comm.</span>
                 </div>
                 <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "4px" }}>
-                  {trk.serviceName} for {trk.clientName} (₱{trk.serviceAmount.toLocaleString()})
+                  {trk.serviceName} for {trk.clientName} ({money(trk.serviceAmount)})
                 </div>
               </div>
             ))}

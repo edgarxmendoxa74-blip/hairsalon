@@ -1,10 +1,18 @@
 // Build the booking confirmation text and open the device's SMS app (staff taps Send).
+// Normalise a phone number to international format. Supports Philippines (+63) and Macau (+853).
 export const toPhNumber = (phone = "") => {
-  const d = String(phone).replace(/\D/g, "");
-  if (d.startsWith("63")) return "+" + d;
-  if (d.startsWith("0")) return "+63" + d.slice(1);
+  const raw = String(phone).trim();
+  const d = raw.replace(/\D/g, "");
+  if (!d) return "";
+  if (raw.startsWith("+")) return "+" + d;               // already international
+  if (d.startsWith("00")) return "+" + d.slice(2);       // 00853..., 0063...
+  if (d.length === 8 && /^[2368]/.test(d)) return "+853" + d;   // Macau local number
+  if (d.length === 11 && d.startsWith("853")) return "+" + d;   // 853 + 8 digits
+  if (d.length === 12 && d.startsWith("63")) return "+" + d;    // 63 + 10 digits
+  if (d.length === 11 && d.startsWith("09")) return "+63" + d.slice(1);
   if (d.length === 10 && d.startsWith("9")) return "+63" + d;
-  return d ? "+" + d : "";
+  if (d.startsWith("0")) return "+63" + d.slice(1);
+  return "+" + d;
 };
 
 export const formatTime = (t = "") => {
@@ -24,6 +32,9 @@ export const buildBookingMessage = (apt) => {
 };
 
 export const smsLink = (phone, body) => `sms:${toPhNumber(phone)}?&body=${encodeURIComponent(body)}`;
+
+// Opens WhatsApp chat with the message prefilled (works for Macau, PH and any country)
+export const whatsappLink = (phone, body) => `https://wa.me/${toPhNumber(phone).replace(/\D/g, "")}?text=${encodeURIComponent(body)}`;
 
 export const copyText = async (text) => {
   try {

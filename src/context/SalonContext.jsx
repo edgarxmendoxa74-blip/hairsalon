@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { formatMoney } from "../utils/currency";
 import {
   initialStaff,
   initialServices,
@@ -356,7 +357,7 @@ export const SalonProvider = ({ children }) => {
     }
 
     showToast(
-      `Service recorded for ${staffMember.name}! Earned ₱${commissionVal.toLocaleString()} commission (+₱${tip} tip).`
+      `Service recorded for ${staffMember.name}! Earned ${formatMoney(commissionVal)} commission (+${formatMoney(tip)} tip).`
     );
     return newTrackingRecord;
   };
@@ -470,7 +471,7 @@ export const SalonProvider = ({ children }) => {
       }
     });
 
-    showToast(`Transaction ${newSale.id} completed! Total: ₱${total.toLocaleString()}`);
+    showToast(`Transaction ${newSale.id} completed! Total: ${formatMoney(total)}`);
     return newSale;
   };
 

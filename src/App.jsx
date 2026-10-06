@@ -1,6 +1,7 @@
 import React from "react";
 import { SalonProvider, useSalon } from "./context/SalonContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 import Login from "./components/Login";
 import TabletShell from "./components/TabletShell";
 import Dashboard from "./components/Dashboard";
@@ -59,11 +60,13 @@ const AuthGate = () => {
   if (!session) return <Login />;
 
   return (
-    <SalonProvider>
-      <TabletShell>
-        <ActiveTabRenderer />
-      </TabletShell>
-    </SalonProvider>
+    <CurrencyProvider>
+      <SalonProvider>
+        <TabletShell>
+          <ActiveTabRenderer />
+        </TabletShell>
+      </SalonProvider>
+    </CurrencyProvider>
   );
 };
 

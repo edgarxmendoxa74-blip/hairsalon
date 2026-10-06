@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips from "./CategoryChips";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 const StaffServiceTracking = () => {
+  const { money } = useCurrency();
   const {
     staff,
     clients,
@@ -179,7 +181,7 @@ const StaffServiceTracking = () => {
             <div className="label">Top Performing Stylist</div>
             <div className="value">{topEarner ? topEarner.name : "N/A"}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-rose)", marginTop: "2px", fontWeight: 600 }}>
-              {topEarner ? `₱${topEarner.totalRevenue.toLocaleString()} Revenue Generated` : "No logs"}
+              {topEarner ? `${money(topEarner.totalRevenue)} Revenue Generated` : "No logs"}
             </div>
           </div>
         </div>
@@ -190,7 +192,7 @@ const StaffServiceTracking = () => {
           </div>
           <div className="stat-info">
             <div className="label">Total Staff Commissions</div>
-            <div className="value">₱{totalCommissionPaidMonth.toLocaleString()}</div>
+            <div className="value">{money(totalCommissionPaidMonth)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-emerald)", marginTop: "2px", fontWeight: 600 }}>
               For Month ({selectedMonthFilter})
             </div>
@@ -235,15 +237,15 @@ const StaffServiceTracking = () => {
             { key: "role", label: "Role", hideMd: true },
             { key: "commissionRate", label: "Commission Rate", num: true, hideSm: true, render: (r) => `${r.commissionRate}%` },
             { key: "servicesDone", label: "Services Done", num: true },
-            { key: "totalRevenue", label: "Revenue Generated", num: true, render: (r) => `₱${r.totalRevenue.toLocaleString()}` },
-            { key: "totalCommission", label: "Commission Earned", num: true, render: (r) => `₱${r.totalCommission.toLocaleString()}` },
-            { key: "totalTips", label: "Tips Received", num: true, render: (r) => `₱${r.totalTips.toLocaleString()}` },
-            { key: "totalPayout", label: "Total Payout", num: true, style: { fontWeight: 700 }, render: (r) => `₱${r.totalPayout.toLocaleString()}` }
+            { key: "totalRevenue", label: "Revenue Generated", num: true, render: (r) => `${money(r.totalRevenue)}` },
+            { key: "totalCommission", label: "Commission Earned", num: true, render: (r) => `${money(r.totalCommission)}` },
+            { key: "totalTips", label: "Tips Received", num: true, render: (r) => `${money(r.totalTips)}` },
+            { key: "totalPayout", label: "Total Payout", num: true, style: { fontWeight: 700 }, render: (r) => `${money(r.totalPayout)}` }
           ]}
           rows={staffMonthlyStats}
           totals={(() => {
             const sum = (k) => staffMonthlyStats.reduce((a, r) => a + r[k], 0);
-            const peso = (k) => `₱${sum(k).toLocaleString()}`;
+            const peso = (k) => `${money(sum(k))}`;
             return { name: "TOTAL", servicesDone: sum("servicesDone"), totalRevenue: peso("totalRevenue"), totalCommission: peso("totalCommission"), totalTips: peso("totalTips"), totalPayout: peso("totalPayout") };
           })()}
         />
@@ -298,11 +300,11 @@ const StaffServiceTracking = () => {
               { key: "staffName", label: "Assigned Stylist", style: { fontWeight: 700, color: "var(--accent-rose)" } },
               { key: "clientName", label: "Client" },
               { key: "serviceName", label: "Service Rendered", style: { fontWeight: 600 } },
-              { key: "serviceAmount", label: "Service Amount", style: { fontWeight: 700 }, render: (t) => `₱${t.serviceAmount.toLocaleString()}` },
+              { key: "serviceAmount", label: "Service Amount", style: { fontWeight: 700 }, render: (t) => `${money(t.serviceAmount)}` },
               { key: "commissionRate", label: "Commission Rate", render: (t) => `${t.commissionRate}%` },
-              { key: "commissionEarned", label: "Commission Earned", style: { fontWeight: 700, color: "var(--accent-emerald)" }, render: (t) => `₱${t.commissionEarned.toLocaleString()}` },
-              { key: "tipAmount", label: "Tip", style: { color: "var(--accent-amber)" }, render: (t) => `₱${t.tipAmount || 0}` },
-              { key: "totalEarnings", label: "Total Earnings", style: { fontWeight: 800, color: "var(--accent-rose)" }, render: (t) => `₱${t.totalEarnings.toLocaleString()}` }
+              { key: "commissionEarned", label: "Commission Earned", style: { fontWeight: 700, color: "var(--accent-emerald)" }, render: (t) => `${money(t.commissionEarned)}` },
+              { key: "tipAmount", label: "Tip", style: { color: "var(--accent-amber)" }, render: (t) => `${money(t.tipAmount || 0)}` },
+              { key: "totalEarnings", label: "Total Earnings", style: { fontWeight: 800, color: "var(--accent-rose)" }, render: (t) => `${money(t.totalEarnings)}` }
             ]}
             rows={filteredTracking}
           />
@@ -381,7 +383,7 @@ const StaffServiceTracking = () => {
                     >
                       {services.map((srv) => (
                         <option key={srv.id} value={srv.id}>
-                          {srv.name} - ₱{srv.price.toLocaleString()} ({srv.duration} mins)
+                          {srv.name} - {money(srv.price)} ({srv.duration} mins)
                         </option>
                       ))}
                     </select>
@@ -389,7 +391,7 @@ const StaffServiceTracking = () => {
 
                   {/* Service Charge Amount */}
                   <div className="form-group">
-                    <label>Service Price (₱) *</label>
+                    <label>Service Price (₱ PHP) *</label>
                     <input
                       type="number"
                       className="form-control"
@@ -401,7 +403,7 @@ const StaffServiceTracking = () => {
 
                   {/* Tip Amount */}
                   <div className="form-group">
-                    <label>Client Tip Amount (₱)</label>
+                    <label>Client Tip Amount (₱ PHP)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -436,7 +438,7 @@ const StaffServiceTracking = () => {
                       <div><span>Stylist</span><strong>{selStaff ? selStaff.name : "—"}</strong></div>
                       <div><span>Client</span><strong>{selClient ? selClient.name : "—"}</strong></div>
                       <div><span>Service</span><strong>{selService ? selService.name : "—"}</strong></div>
-                      <div><span>Service Price</span><strong>₱{Number(formData.serviceAmount || 0).toLocaleString()}</strong></div>
+                      <div><span>Service Price</span><strong>{money(Number(formData.serviceAmount || 0))}</strong></div>
                     </div>
                   );
                 })()}
@@ -452,11 +454,11 @@ const StaffServiceTracking = () => {
                     <div style={{ background: "rgba(138, 111, 124, 0.12)", border: "1px solid var(--accent-rose)", padding: "14px 18px", borderRadius: "12px", marginTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Calculated Commission ({rate}%):</div>
-                        <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--accent-rose)" }}>₱{comm}</div>
+                        <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--accent-rose)" }}>{money(comm)}</div>
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Total Stylist Take-Home (+Tip):</div>
-                        <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--accent-emerald)" }}>₱{total}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--accent-emerald)" }}>{money(total)}</div>
                       </div>
                     </div>
                   );

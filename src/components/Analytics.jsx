@@ -1,4 +1,5 @@
 import React from "react";
+import { useCurrency } from "../context/CurrencyContext";
 import { useSalon } from "../context/SalonContext";
 import { LineChart, TrendingUp, Award, Users, Scissors, CalendarCheck } from "lucide-react";
 
@@ -20,6 +21,7 @@ const BarRow = ({ label, value, max, display, color = "var(--mauve-deep)" }) => 
 const topN = (map, n = 5) => Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, n);
 
 const Analytics = () => {
+  const { money } = useCurrency();
   const { sales, staffTracking, appointments } = useSalon();
 
   // Last 7 days revenue
@@ -51,7 +53,7 @@ const Analytics = () => {
   appointments.forEach((a) => { statusCount[a.status] = (statusCount[a.status] || 0) + 1; });
   const completionRate = appointments.length ? Math.round(((statusCount.Completed || 0) / appointments.length) * 100) : 0;
 
-  const peso = (n) => `₱${n.toLocaleString()}`;
+  const peso = (n) => `${money(n)}`;
   const Section = ({ icon: Icon, title, children }) => (
     <div className="glass-card">
       <h3 style={{ fontSize: "16px", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>

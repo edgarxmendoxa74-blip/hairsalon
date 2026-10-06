@@ -1,4 +1,5 @@
 import ExcelSheet from "./ExcelSheet";
+import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips from "./CategoryChips";
 import ExportButton from "./ExportButton";
 import React, { useState } from "react";
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 const Appointments = () => {
+  const { money, symbol } = useCurrency();
   const {
     appointments,
     clients,
@@ -154,7 +156,7 @@ const Appointments = () => {
               { key: "clientPhone", label: "Phone Number", style: { whiteSpace: "nowrap" }, render: (a) => a.clientPhone || <span style={{ color: "var(--text-dim)" }}>No number</span> },
               { key: "serviceName", label: "Service Booked", render: (a) => (<><div style={{ fontWeight: 600 }}>{a.serviceName}</div>{(a.notes || a.treatmentNotes) && (<div className="apt-note" title={[a.notes, a.treatmentNotes].filter(Boolean).join(" | ")}>📝 {a.treatmentNotes || a.notes}</div>)}</>) },
               { key: "staffName", label: "Assigned Stylist", style: { fontWeight: 600, color: "var(--accent-purple)" } },
-              { key: "amount", label: "Amount (₱)", style: { fontWeight: 800 }, render: (a) => `₱${a.amount.toLocaleString()}` },
+              { key: "amount", label: `Amount (${symbol})`, style: { fontWeight: 800 }, render: (a) => `${money(a.amount)}` },
               { key: "status", label: "Status", render: (a) => (<><span className={`status-badge ${a.status.toLowerCase().replace("-", "")}`}>{a.status}</span></>) },
               { key: "actions", label: "Actions", render: (a) => {
                 const canStart = a.status === "Scheduled";
@@ -225,7 +227,7 @@ const Appointments = () => {
                       required
                     >
                       {services.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name} - ₱{s.price.toLocaleString()}</option>
+                        <option key={s.id} value={s.id}>{s.name} - {money(s.price)}</option>
                       ))}
                     </select>
                   </div>
@@ -316,12 +318,12 @@ const Appointments = () => {
                 <div style={{ background: "var(--bg-input)", padding: "14px", borderRadius: "12px", marginBottom: "16px" }}>
                   <div style={{ fontWeight: 700, fontSize: "15px" }}>{selectedApt.serviceName}</div>
                   <div style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>
-                    Assigned Stylist: <strong>{selectedApt.staffName}</strong> • Service Total: <strong style={{ color: "var(--accent-rose)" }}>₱{selectedApt.amount.toLocaleString()}</strong>
+                    Assigned Stylist: <strong>{selectedApt.staffName}</strong> • Service Total: <strong style={{ color: "var(--accent-rose)" }}>{money(selectedApt.amount)}</strong>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Client Tip for {selectedApt.staffName} (₱)</label>
+                  <label>Client Tip for {selectedApt.staffName} (₱ PHP)</label>
                   <input
                     type="number"
                     className="form-control"

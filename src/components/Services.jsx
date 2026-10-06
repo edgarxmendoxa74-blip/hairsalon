@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import React, { useState } from "react";
 import CategorySlider from "./CategorySlider";
 import { loadCustomCategories, saveCustomCategories as persistCategories } from "../utils/serviceCategories";
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 const Services = () => {
+  const { money } = useCurrency();
   const { services, staff, addService, updateService, deleteService } = useSalon();
   const [editingId, setEditingId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -102,7 +104,7 @@ const Services = () => {
             <Scissors size={26} color="var(--accent-pink)" /> Service List, Pricing & Duration
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
-            Catalog of salon services, pricing in PHP (₱), duration in minutes, and assigned qualified staff.
+            Catalog of salon services, pricing in PHP or USD (switch at the top right), duration in minutes, and assigned qualified staff.
           </p>
         </div>
 
@@ -156,7 +158,7 @@ const Services = () => {
                   <Clock size={16} color="var(--accent-sky)" /> {srv.duration} mins
                 </div>
                 <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--accent-emerald)" }}>
-                  ₱{srv.price.toLocaleString()}
+                  {money(srv.price)}
                 </div>
               </div>
             </div>
@@ -240,7 +242,7 @@ const Services = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Price (₱) *</label>
+                    <label>Price (₱ PHP) *</label>
                     <input
                       type="number"
                       className="form-control"

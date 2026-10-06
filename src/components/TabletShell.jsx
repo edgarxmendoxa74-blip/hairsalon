@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useCurrency } from "../context/CurrencyContext";
 import { useSalon } from "../context/SalonContext";
 import Navigation from "./Navigation";
 import PageSlides from "./PageSlides";
@@ -6,6 +7,7 @@ import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 const TabletShell = ({ children }) => {
   const { toastMessage, activeTab } = useSalon();
+  const { currency, setCurrency, rate, setRate } = useCurrency();
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -76,6 +78,19 @@ const TabletShell = ({ children }) => {
             <header className="tablet-topbar">
               <div className="topbar-left">
                 <h1 className="page-title">{getPageTitle()}</h1>
+              </div>
+
+              <div className="currency-switch" title="Display currency. Prices are stored in PHP.">
+                <div className="currency-toggle">
+                  <button type="button" className={currency === "PHP" ? "active" : ""} onClick={() => setCurrency("PHP")}>₱ PHP</button>
+                  <button type="button" className={currency === "USD" ? "active" : ""} onClick={() => setCurrency("USD")}>$ USD</button>
+                </div>
+                {currency === "USD" && (
+                  <label className="currency-rate">
+                    $1 = ₱
+                    <input type="number" min="1" step="0.01" value={rate} onChange={(e) => setRate(e.target.value)} />
+                  </label>
+                )}
               </div>
 
               <div className="topbar-clock" style={{ textAlign: "right", color: "var(--text-muted)", lineHeight: 1.2 }}>

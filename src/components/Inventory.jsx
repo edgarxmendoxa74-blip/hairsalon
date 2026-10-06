@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 const Inventory = () => {
+  const { money } = useCurrency();
   const {
     inventory,
     inventoryLogs,
@@ -208,7 +210,7 @@ const Inventory = () => {
           </div>
           <div className="stat-info">
             <div className="label">Total Inventory Valuation</div>
-            <div className="value">₱{totalStockValuation.toLocaleString()}</div>
+            <div className="value">{money(totalStockValuation)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-sky)", marginTop: "2px", fontWeight: 600 }}>
               At unit cost basis
             </div>
@@ -296,8 +298,8 @@ const Inventory = () => {
                     <div className="log-item-body">
                       <div><span>Current Stock</span><b style={{ fontSize: "15px" }}>{item.currentStock} {item.unit}s</b></div>
                       <div><span>Min Threshold</span><b>{item.minStockThreshold} {item.unit}s</b></div>
-                      <div><span>Unit Cost</span><b>₱{item.unitCost.toLocaleString()}</b></div>
-                      <div><span>Retail Price</span><b style={{ color: item.retailPrice > 0 ? "var(--accent-emerald)" : "var(--text-dim)" }}>{item.retailPrice > 0 ? `₱${item.retailPrice.toLocaleString()}` : "Salon Use"}</b></div>
+                      <div><span>Unit Cost</span><b>{money(item.unitCost)}</b></div>
+                      <div><span>Retail Price</span><b style={{ color: item.retailPrice > 0 ? "var(--accent-emerald)" : "var(--text-dim)" }}>{item.retailPrice > 0 ? `${money(item.retailPrice)}` : "Salon Use"}</b></div>
                       <div><span>Supplier</span><b>{item.supplier}</b></div>
                     </div>
                     <div className="row-actions apt-actions">
@@ -446,7 +448,7 @@ const Inventory = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Unit Cost Price (₱) *</label>
+                    <label>Unit Cost Price (₱ PHP) *</label>
                     <input
                       type="number"
                       className="form-control"
@@ -457,7 +459,7 @@ const Inventory = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Retail Selling Price (₱) (0 if internal)</label>
+                    <label>Retail Selling Price (₱ PHP) (0 if internal)</label>
                     <input
                       type="number"
                       className="form-control"

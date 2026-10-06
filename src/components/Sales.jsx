@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips, { buildOptions } from "./CategoryChips";
 import React, { useState, useEffect } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 const Sales = () => {
+  const { money } = useCurrency();
   const { sales, clients, services, inventory, recordPOSSale } = useSalon();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -166,7 +168,7 @@ const Sales = () => {
                       {s.items.map((i) => `${i.name} (x${i.qty})`).join(", ")}
                     </td>
                     <td style={{ fontWeight: 800, color: "var(--accent-emerald)", fontSize: "15px" }}>
-                      ₱{s.total.toLocaleString()}
+                      {money(s.total)}
                     </td>
                     <td>
                       <button
@@ -226,20 +228,20 @@ const Sales = () => {
                         ? services.map((srv) => (
                             <button key={srv.id} type="button" className="pos-pick" onClick={() => addServiceToCart(srv)}>
                               <span className="pos-pick-name">{srv.name}</span>
-                              <strong className="pos-pick-price">+₱{srv.price.toLocaleString()}</strong>
+                              <strong className="pos-pick-price">+{money(srv.price)}</strong>
                             </button>
                           ))
                         : inventory.map((prod) => (
                             <button key={prod.id} type="button" className="pos-pick" onClick={() => addProductToCart(prod)}>
                               <span className="pos-pick-name">{prod.name}</span>
-                              <strong className="pos-pick-price">+₱{(prod.retailPrice || prod.unitCost).toLocaleString()}</strong>
+                              <strong className="pos-pick-price">+{money((prod.retailPrice || prod.unitCost))}</strong>
                             </button>
                           ))}
                     </div>
 
                     <div className="pos-cart-bar">
                       <span>{cartItems.length} item{cartItems.length === 1 ? "" : "s"} added</span>
-                      <strong>₱{cartSubtotal.toLocaleString()}</strong>
+                      <strong>{money(cartSubtotal)}</strong>
                     </div>
                   </div>
                 ) : (
@@ -252,7 +254,7 @@ const Sales = () => {
                             <div className="pos-cart-name">{item.name}</div>
                             <div className="pos-cart-type">{item.type}</div>
                           </div>
-                          <strong>₱{(item.price * item.qty).toLocaleString()}</strong>
+                          <strong>{money((item.price * item.qty))}</strong>
                           <button type="button" className="icon-btn danger" title="Remove" onClick={() => removeFromCart(idx)}>
                             <Trash2 size={14} />
                           </button>
@@ -262,7 +264,7 @@ const Sales = () => {
 
                     <div className="pos-pay-grid">
                       <div className="form-group">
-                        <label>Discount Amount (₱)</label>
+                        <label>Discount Amount (₱ PHP)</label>
                         <input type="number" min="0" className="form-control" value={discountAmt} onChange={(e) => setDiscountAmt(e.target.value)} />
                       </div>
                       <div className="form-group">
@@ -276,9 +278,9 @@ const Sales = () => {
                     </div>
 
                     <div className="pos-totals">
-                      <div><span>Subtotal</span><span>₱{cartSubtotal.toLocaleString()}</span></div>
-                      <div><span>Discount</span><span>−₱{Number(discountAmt || 0).toLocaleString()}</span></div>
-                      <div className="pos-total-final"><span>Total Payable</span><span>₱{cartTotal.toLocaleString()}</span></div>
+                      <div><span>Subtotal</span><span>{money(cartSubtotal)}</span></div>
+                      <div><span>Discount</span><span>−{money(Number(discountAmt || 0))}</span></div>
+                      <div className="pos-total-final"><span>Total Payable</span><span>{money(cartTotal)}</span></div>
                     </div>
                   </div>
                 )}
@@ -333,7 +335,7 @@ const Sales = () => {
                 {selectedReceipt.items.map((item, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between" }}>
                     <span>{item.qty}x {item.name}</span>
-                    <span>₱{(item.price * item.qty).toLocaleString()}</span>
+                    <span>{money((item.price * item.qty))}</span>
                   </div>
                 ))}
               </div>
@@ -341,15 +343,15 @@ const Sales = () => {
               <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span>Subtotal:</span>
-                  <span>₱{selectedReceipt.subtotal.toLocaleString()}</span>
+                  <span>{money(selectedReceipt.subtotal)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span>Discount:</span>
-                  <span>-₱{selectedReceipt.discount}</span>
+                  <span>-{money(selectedReceipt.discount)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: 800, marginTop: "6px", color: "var(--accent-emerald)" }}>
                   <span>TOTAL PAID:</span>
-                  <span>₱{selectedReceipt.total.toLocaleString()}</span>
+                  <span>{money(selectedReceipt.total)}</span>
                 </div>
               </div>
             </div>

@@ -1326,3 +1326,12 @@ select.form-control { min-width: 210px; }
 .cat-arrow:disabled { opacity: 0.35; cursor: default; }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
 .slide-in { animation: slideInRight 0.35s ease; }
+
+/* Currency switch (top bar) */
+.currency-switch { display: flex; align-items: center; gap: 10px; margin-left: auto; margin-right: 18px; }
+.currency-toggle { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--cream-deep); border: 1px solid var(--border-color); }
+.currency-toggle button { height: 30px; padding: 0 14px; border: none; border-radius: 999px; background: transparent; font-weight: 700; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.currency-toggle button.active { background: var(--mauve-deep); color: #fff4e6; }
+.currency-rate { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.currency-rate input { width: 70px; height: 30px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); padding: 0 8px; font-size: 12px; }
+@media (max-width: 760px) { .currency-rate { display: none; } .currency-switch { margin-right: 8px; } }

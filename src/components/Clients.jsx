@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips from "./CategoryChips";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 const Clients = () => {
+  const { money } = useCurrency();
   const { clients, staffTracking, sales, addClient, updateClient, deleteClient } = useSalon();
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,7 +176,7 @@ const Clients = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Total Spent</div>
-                  <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--accent-emerald)" }}>₱{client.totalSpent.toLocaleString()}</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--accent-emerald)" }}>{money(client.totalSpent)}</div>
                 </div>
               </div>
             </div>
@@ -233,7 +235,7 @@ const Clients = () => {
                           </td>
                           <td style={{ fontWeight: 700 }}>{log.serviceName}</td>
                           <td style={{ color: "var(--accent-rose)", fontWeight: 600 }}>{log.staffName}</td>
-                          <td style={{ fontWeight: 800 }}>₱{log.serviceAmount.toLocaleString()}</td>
+                          <td style={{ fontWeight: 800 }}>{money(log.serviceAmount)}</td>
                         </tr>
                       ))
                     )}
@@ -285,7 +287,7 @@ const Clients = () => {
                           <td>
                             <span className="status-badge completed" style={{ fontSize: "11px" }}>{s.paymentMethod}</span>
                           </td>
-                          <td style={{ fontWeight: 800, color: "var(--accent-emerald)" }}>₱{s.total.toLocaleString()}</td>
+                          <td style={{ fontWeight: 800, color: "var(--accent-emerald)" }}>{money(s.total)}</td>
                         </tr>
                       ))
                     )}

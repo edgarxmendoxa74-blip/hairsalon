@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useCurrency } from "../context/CurrencyContext";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 const Reports = () => {
+  const { money } = useCurrency();
   const { sales, staffTracking, services, inventory, staff } = useSalon();
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // "2026-10"
 
@@ -101,7 +103,7 @@ const Reports = () => {
           </div>
           <div className="stat-info">
             <div className="label">Monthly Revenue</div>
-            <div className="value">₱{totalMonthlyRevenue.toLocaleString()}</div>
+            <div className="value">{money(totalMonthlyRevenue)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-emerald)", marginTop: "2px", fontWeight: 600 }}>
               {monthlySales.length} Transactions
             </div>
@@ -114,9 +116,9 @@ const Reports = () => {
           </div>
           <div className="stat-info">
             <div className="label">Stylist Commissions Paid</div>
-            <div className="value">₱{totalCommissionsPaid.toLocaleString()}</div>
+            <div className="value">{money(totalCommissionsPaid)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-rose)", marginTop: "2px", fontWeight: 600 }}>
-              +₱{totalTipsPaid.toLocaleString()} Tips
+              +{money(totalTipsPaid)} Tips
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@ const Reports = () => {
           </div>
           <div className="stat-info">
             <div className="label">Inventory Asset Valuation</div>
-            <div className="value">₱{totalInventoryValuation.toLocaleString()}</div>
+            <div className="value">{money(totalInventoryValuation)}</div>
             <div style={{ fontSize: "12px", color: "var(--accent-amber)", marginTop: "2px", fontWeight: 600 }}>
               {lowStockCount} Low stock alerts
             </div>
@@ -151,7 +153,7 @@ const Reports = () => {
                 <div key={method}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", fontWeight: 600, marginBottom: "6px" }}>
                     <span>{method}</span>
-                    <span>₱{amount.toLocaleString()} ({pct}%)</span>
+                    <span>{money(amount)} ({pct}%)</span>
                   </div>
                   <div style={{ height: "10px", background: "var(--bg-input)", borderRadius: "99px", overflow: "hidden" }}>
                     <div
@@ -189,7 +191,7 @@ const Reports = () => {
                     <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{data.count} times performed</div>
                   </div>
                   <div style={{ fontWeight: 800, color: "var(--accent-emerald)" }}>
-                    ₱{data.revenue.toLocaleString()}
+                    {money(data.revenue)}
                   </div>
                 </div>
               ))
@@ -208,7 +210,7 @@ const Reports = () => {
         {(() => {
           const rows = payoutRows;
           const sum = (k) => rows.reduce((a, r) => a + r[k], 0);
-          const peso = (n) => `₱${n.toLocaleString()}`;
+          const peso = (n) => `${money(n)}`;
           return (
             <>
             <ExcelSheet
