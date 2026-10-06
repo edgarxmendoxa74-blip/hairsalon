@@ -1,4 +1,5 @@
 import ExcelSheet from "./ExcelSheet";
+import { buildBookingMessage, smsLink, copyText } from "../utils/sms";
 import ExportButton from "./ExportButton";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
@@ -21,6 +22,8 @@ const Appointments = () => {
     inventory,
     addAppointment,
     updateAppointmentStatus,
+    markSmsSent,
+    showToast,
     completeAppointmentAndTrack
   } = useSalon();
 
@@ -68,6 +71,21 @@ const Appointments = () => {
       setSelectedApt(null);
       setSelectedProductIds([]);
     }
+  };
+
+  const sendSms = (apt) => {
+    if (!apt.clientPhone) {
+      showToast("This client has no phone number saved.", "error");
+      return;
+    }
+    window.location.href = smsLink(apt.clientPhone, buildBookingMessage(apt));
+    markSmsSent(apt.id);
+  };
+
+  const copySms = async (apt) => {
+    const ok = await copyText(buildBookingMessage(apt));
+    showToast(ok ? "Booking message copied. Paste it in Viber / Messenger." : "Could not copy the message.", ok ? "success" : "error");
+    if (ok) markSmsSent(apt.id);
   };
 
   const toggleProductSelect = (id) => {
@@ -142,12 +160,13 @@ const Appointments = () => {
               { key: "serviceName", label: "Service Booked", render: (a) => (<><div style={{ fontWeight: 600 }}>{a.serviceName}</div>{(a.notes || a.treatmentNotes) && (<div className="apt-note" title={[a.notes, a.treatmentNotes].filter(Boolean).join(" | ")}>📝 {a.treatmentNotes || a.notes}</div>)}</>) },
               { key: "staffName", label: "Assigned Stylist", style: { fontWeight: 600, color: "var(--accent-purple)" } },
               { key: "amount", label: "Amount (₱)", style: { fontWeight: 800 }, render: (a) => `₱${a.amount.toLocaleString()}` },
-              { key: "status", label: "Status", render: (a) => (<span className={`status-badge ${a.status.toLowerCase().replace("-", "")}`}>{a.status}</span>) },
+              { key: "status", label: "Status", render: (a) => (<><span className={`status-badge ${a.status.toLowerCase().replace("-", "")}`}>{a.status}</span>{a.smsSentAt && <div className="apt-note" style={{ color: "var(--accent-emerald)" }}>✓ SMS sent {new Date(a.smsSentAt).toLocaleDateString()}</div>}</>) },
               { key: "actions", label: "Actions", render: (a) => {
                 const canStart = a.status === "Scheduled";
                 const canComplete = a.status === "Scheduled" || a.status === "In-Progress";
                 const canCancel = a.status === "Scheduled";
-                if (!canStart && !canComplete && !canCancel) {
+                const canSms = a.status !== "Cancelled";
+                if (!canStart && !canComplete && !canCancel && !canSms) {
                   return <span style={{ color: "var(--text-dim)", fontSize: "13px" }}>No actions</span>;
                 }
                 return (
@@ -159,6 +178,8 @@ const Appointments = () => {
                       const v = e.target.value;
                       if (v === "start") updateAppointmentStatus(a.id, "In-Progress");
                       else if (v === "complete") { setSelectedApt(a); setIsCheckoutModalOpen(true); }
+                      else if (v === "sms") sendSms(a);
+                      else if (v === "copy") copySms(a);
                       else if (v === "cancel") {
                         if (window.confirm("Cancel the appointment for " + a.clientName + "?")) updateAppointmentStatus(a.id, "Cancelled");
                       }
@@ -167,6 +188,8 @@ const Appointments = () => {
                     <option value="" disabled>Select action…</option>
                     {canStart && <option value="start">Start Service</option>}
                     {canComplete && <option value="complete">Complete &amp; Track</option>}
+                    {canSms && <option value="sms">{a.smsSentAt ? "Send SMS again" : "Send booking SMS"}</option>}
+                    {canSms && <option value="copy">Copy booking message</option>}
                     {canCancel && <option value="cancel">Cancel Appointment</option>}
                   </select>
                 );

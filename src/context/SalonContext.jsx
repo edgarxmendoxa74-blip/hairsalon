@@ -388,6 +388,10 @@ export const SalonProvider = ({ children }) => {
     showToast(`Appointment status updated to "${newStatus}".`, "info");
   };
 
+  const markSmsSent = (id) => {
+    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, smsSentAt: new Date().toISOString() } : a)));
+  };
+
   // Complete Appointment & Auto Track Service
   const completeAppointmentAndTrack = (aptId, tipAmount = 0, autoDeductProductIds = [], treatmentNotes = "") => {
     const apt = appointments.find((a) => a.id === aptId);
@@ -518,6 +522,7 @@ export const SalonProvider = ({ children }) => {
         recordStaffService,
         addAppointment,
         updateAppointmentStatus,
+        markSmsSent,
         completeAppointmentAndTrack,
         recordPOSSale
       }}
