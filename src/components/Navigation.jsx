@@ -1,0 +1,80 @@
+import React from "react";
+import { useSalon } from "../context/SalonContext";
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Scissors,
+  UserCheck,
+  Award,
+  Package,
+  CreditCard,
+  BarChart3,
+  Sparkles
+} from "lucide-react";
+
+const Navigation = () => {
+  const { activeTab, setActiveTab, lowStockCount, todayAppointmentsCount } = useSalon();
+
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "appointments", label: "Appointments", icon: Calendar, badge: todayAppointmentsCount > 0 ? todayAppointmentsCount : null, badgeClass: "info" },
+    { id: "clients", label: "Clients", icon: Users },
+    { id: "services", label: "Services", icon: Scissors },
+    { id: "staff", label: "Staff Management", icon: UserCheck },
+    { id: "tracking", label: "Staff Service Tracking", icon: Award, highlight: true }, // Main focus
+    { id: "inventory", label: "Inventory", icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeClass: "alert", highlight: true }, // Main focus
+    { id: "sales", label: "Sales & POS", icon: CreditCard },
+    { id: "reports", label: "Reports", icon: BarChart3 }
+  ];
+
+  return (
+    <aside className="tablet-sidebar">
+      <div>
+        {/* Brand Header */}
+        <div className="brand-header">
+          <div className="brand-logo">
+            <Sparkles size={24} />
+          </div>
+          <div>
+            <div className="brand-title">GlowStudio</div>
+            <div className="brand-subtitle">Salon Tablet POS</div>
+          </div>
+        </div>
+
+        {/* Navigation List */}
+        <nav className="nav-menu">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`nav-item ${isActive ? "active" : ""} ${item.highlight ? "highlight-tab" : ""}`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <div className="nav-item-left">
+                  <Icon size={20} color={isActive ? "var(--accent-forest)" : item.highlight ? "var(--accent-green)" : "currentColor"} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className={`nav-badge ${item.badgeClass || "info"}`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Footer info inside sidebar */}
+      <div style={{ padding: "12px", borderTop: "1px solid var(--border-color)", marginTop: "16px", fontSize: "12px", color: "var(--text-muted)" }}>
+        <div style={{ fontWeight: 700, color: "var(--text-main)", marginBottom: "2px" }}>Tablet Mode Active</div>
+        <div>Touch POS v2.5 • Ph Peso (₱)</div>
+      </div>
+    </aside>
+  );
+};
+
+export default Navigation;
