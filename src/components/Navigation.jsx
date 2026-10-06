@@ -10,7 +10,7 @@ import {
   Package,
   CreditCard,
   BarChart3,
-  Sparkles
+  LineChart
 } from "lucide-react";
 
 const Navigation = () => {
@@ -25,6 +25,7 @@ const Navigation = () => {
     { id: "tracking", label: "Staff Service Tracking", icon: Award, highlight: true }, // Main focus
     { id: "inventory", label: "Inventory", icon: Package, badge: lowStockCount > 0 ? `${lowStockCount} Low` : null, badgeClass: "alert", highlight: true }, // Main focus
     { id: "sales", label: "Sales & POS", icon: CreditCard },
+    { id: "analytics", label: "Analytics", icon: LineChart },
     { id: "reports", label: "Reports", icon: BarChart3 }
   ];
 
@@ -34,11 +35,11 @@ const Navigation = () => {
         {/* Brand Header */}
         <div className="brand-header">
           <div className="brand-logo">
-            <Sparkles size={24} />
+            <span className="brand-monogram">FS</span>
           </div>
           <div>
-            <div className="brand-title">GlowStudio</div>
-            <div className="brand-subtitle">Salon Tablet POS</div>
+            <div className="brand-title">Fix Salon</div>
+            <div className="brand-subtitle">your hair specialist</div>
           </div>
         </div>
 

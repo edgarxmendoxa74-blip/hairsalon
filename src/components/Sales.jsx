@@ -167,7 +167,7 @@ const Sales = () => {
           <div className="modal-content" style={{ maxWidth: "800px" }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <ShoppingBag size={20} color="var(--accent-rose)" /> GlowStudio Point-of-Sale Register
+                <ShoppingBag size={20} color="var(--accent-rose)" /> Fix Salon Point-of-Sale Register
               </h3>
               <button onClick={() => setIsPOSModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
@@ -223,7 +223,7 @@ const Sales = () => {
                           onClick={() => addProductToCart(prod)}
                         >
                           <span>{prod.name}</span>
-                          <strong style={{ color: "#34d399" }}>+₱{prod.retailPrice || prod.unitCost}</strong>
+                          <strong style={{ color: "#4d7a4a" }}>+₱{prod.retailPrice || prod.unitCost}</strong>
                         </button>
                       ))}
                     </div>
@@ -312,7 +312,7 @@ const Sales = () => {
             </div>
             <div className="modal-body" style={{ fontFamily: "monospace", fontSize: "13px" }}>
               <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "18px" }}>GLOW STUDIO SALON & SPA</h3>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "18px" }}>FIX SALON · YOUR HAIR SPECIALIST</h3>
                 <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>123 Metro Manila Ave, PH</div>
                 <div style={{ marginTop: "8px", fontWeight: 700 }}>Receipt #{selectedReceipt.id}</div>
                 <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>{new Date(selectedReceipt.date).toLocaleString()}</div>

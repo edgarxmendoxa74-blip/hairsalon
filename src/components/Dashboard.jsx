@@ -55,16 +55,17 @@ const Dashboard = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+
       
       {/* LOW STOCK ALERT BANNER IF APPLICABLE */}
       {lowStockCount > 0 && (
-        <div className="glass-card highlight-focus" style={{ borderColor: "var(--accent-amber)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{ background: "rgba(245, 158, 11, 0.2)", padding: "10px", borderRadius: "12px", color: "#f59e0b" }}>
+        <div className="glass-card highlight-focus low-stock-banner">
+          <div className="banner-main">
+            <div className="banner-icon">
               <AlertTriangle size={24} />
             </div>
-            <div>
-              <h4 style={{ color: "#fbbf24", fontSize: "16px" }}>
+            <div className="banner-text">
+              <h4 style={{ color: "var(--ink)", fontSize: "16px" }}>
                 Low Stock Alert: {lowStockCount} Product{lowStockCount > 1 ? "s" : ""} need restock!
               </h4>
               <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
@@ -72,7 +73,7 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div className="banner-actions">
             <button className="btn-secondary" onClick={() => quickRestockLowStockItems(10)}>
               ⚡ Quick Restock All (+10)
             </button>
@@ -84,7 +85,7 @@ const Dashboard = () => {
       )}
 
       {/* KPI METRIC CARDS GRID */}
-      <div className="stats-grid">
+      <div className="stats-grid dash-stats">
         <div className="glass-card stat-card">
           <div className="stat-icon emerald">
             <DollarSign size={26} />
@@ -141,10 +142,10 @@ const Dashboard = () => {
       </div>
 
       {/* QUICK FOCUS SHORTCUTS & CORE FLOW */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+      <div className="dash-row">
         
         {/* MAIN FOCUS 1: STAFF SERVICE TRACKING BANNER */}
-        <div className="glass-card" style={{ background: "var(--accent-mint)", border: "1.5px solid var(--accent-gold)" }}>
+        <div className="glass-card dash-focus-card" style={{ background: "var(--accent-mint)", border: "1.5px solid var(--accent-gold)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
             <div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(217, 119, 6, 0.15)", border: "1px solid var(--accent-gold)", padding: "4px 10px", borderRadius: "99px", color: "var(--accent-gold)", fontSize: "12px", fontWeight: 800, marginBottom: "8px" }}>
@@ -156,7 +157,7 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "auto", paddingTop: "16px" }}>
             <button className="btn-primary" onClick={() => setActiveTab("tracking")}>
               <PlusCircle size={18} /> Record New Staff Service
             </button>
@@ -164,7 +165,7 @@ const Dashboard = () => {
         </div>
 
         {/* MAIN FOCUS 2: INVENTORY MANAGEMENT BANNER */}
-        <div className="glass-card" style={{ background: "var(--accent-mint)", border: "1.5px solid var(--accent-gold)" }}>
+        <div className="glass-card dash-focus-card" style={{ background: "var(--accent-mint)", border: "1.5px solid var(--accent-gold)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
             <div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(217, 119, 6, 0.15)", border: "1px solid var(--accent-gold)", padding: "4px 10px", borderRadius: "99px", color: "var(--accent-gold)", fontSize: "12px", fontWeight: 800, marginBottom: "8px" }}>
@@ -176,7 +177,7 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "auto", paddingTop: "16px" }}>
             <button className="btn-secondary" style={{ borderColor: "var(--accent-gold)", color: "var(--accent-forest)" }} onClick={() => setActiveTab("inventory")}>
               <TrendingUp size={18} /> View Stock & Low-Stock Alerts
             </button>
@@ -185,7 +186,7 @@ const Dashboard = () => {
       </div>
 
       {/* DASHBOARD BOTTOM GRID: APPOINTMENTS AGENDA & RECENT STAFF SERVICE LOGS */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "20px" }}>
+      <div className="dash-row">
         
         {/* Today's Schedule Agenda */}
         <div className="glass-card">

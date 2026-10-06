@@ -11,7 +11,9 @@ import {
   History,
   Boxes,
   Zap,
-  Tag
+  Tag,
+  Edit,
+  Trash2
 } from "lucide-react";
 
 const Inventory = () => {
@@ -19,6 +21,8 @@ const Inventory = () => {
     inventory,
     inventoryLogs,
     addInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem,
     stockInItem,
     stockOutItem,
     quickRestockLowStockItems,
@@ -34,9 +38,10 @@ const Inventory = () => {
   const [isStockInModalOpen, setIsStockInModalOpen] = useState(false);
   const [isStockOutModalOpen, setIsStockOutModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   // Form states
-  const [itemFormData, setItemFormData] = useState({
+  const emptyItem = {
     name: "",
     category: "Hair Color & Bleach",
     unit: "Tub",
@@ -45,7 +50,8 @@ const Inventory = () => {
     unitCost: 500,
     retailPrice: 0,
     supplier: ""
-  });
+  };
+  const [itemFormData, setItemFormData] = useState({ ...emptyItem });
 
   const [movementQty, setMovementQty] = useState(1);
   const [movementReason, setMovementReason] = useState("");
@@ -63,20 +69,29 @@ const Inventory = () => {
   // Calculate stock valuation
   const totalStockValuation = inventory.reduce((acc, item) => acc + item.currentStock * item.unitCost, 0);
 
+  const openAddItem = () => {
+    setEditingId(null);
+    setItemFormData({ ...emptyItem });
+    setIsAddItemModalOpen(true);
+  };
+
+  const openEditItem = (item) => {
+    setEditingId(item.id);
+    setItemFormData({ ...emptyItem, ...item });
+    setIsAddItemModalOpen(true);
+  };
+
+  const handleDeleteItem = (item) => {
+    if (window.confirm("Remove " + item.name + " from inventory?")) deleteInventoryItem(item.id);
+  };
+
   const handleCreateItemSubmit = (e) => {
     e.preventDefault();
-    addInventoryItem(itemFormData);
+    if (editingId) updateInventoryItem(editingId, itemFormData);
+    else addInventoryItem(itemFormData);
+    setEditingId(null);
     setIsAddItemModalOpen(false);
-    setItemFormData({
-      name: "",
-      category: "Hair Color & Bleach",
-      unit: "Tub",
-      currentStock: 10,
-      minStockThreshold: 5,
-      unitCost: 500,
-      retailPrice: 0,
-      supplier: ""
-    });
+    setItemFormData({ ...emptyItem });
   };
 
   const handleStockInSubmit = (e) => {
@@ -110,7 +125,7 @@ const Inventory = () => {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
         <div>
           <h2 style={{ fontSize: "22px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <Package size={26} color="#10b981" /> Inventory Management & Stock Control
+            <Package size={26} color="#8a6f7c" /> Inventory Management & Stock Control
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
             Track product quantities, execute Stock In / Stock Out adjustments, and monitor low-stock threshold warnings.
@@ -121,7 +136,7 @@ const Inventory = () => {
           <button className="btn-secondary" onClick={() => quickRestockLowStockItems(10)}>
             <Zap size={18} color="#f59e0b" /> Restock Low Stock (+10)
           </button>
-          <button className="btn-primary" onClick={() => setIsAddItemModalOpen(true)}>
+          <button className="btn-primary" onClick={openAddItem}>
             <PlusCircle size={20} /> Add New Product
           </button>
         </div>
@@ -247,94 +262,52 @@ const Inventory = () => {
       {/* VIEW SUB 1: PRODUCTS CATALOG & STOCK CARDS TABLE */}
       {activeTabSub === "catalog" && (
         <div className="glass-card">
-          <div className="custom-table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th>Category</th>
-                  <th>Current Stock</th>
-                  <th>Min Threshold</th>
-                  <th>Status</th>
-                  <th>Unit Cost</th>
-                  <th>Retail Price</th>
-                  <th>Supplier</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInventory.length === 0 ? (
-                  <tr>
-                    <td colSpan="9" style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
-                      No inventory items found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredInventory.map((item) => {
-                    const isLowStock = item.currentStock <= item.minStockThreshold;
-                    const isOutOfStock = item.currentStock === 0;
+          <div className="box-grid">
+            {filteredInventory.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
+                No inventory items found.
+              </div>
+            ) : (
+              filteredInventory.map((item) => {
+                const isLowStock = item.currentStock <= item.minStockThreshold;
+                const isOutOfStock = item.currentStock === 0;
 
-                    return (
-                      <tr key={item.id} style={{ background: isLowStock ? "rgba(245, 158, 11, 0.05)" : "transparent" }}>
-                        <td style={{ fontWeight: 700 }}>
-                          <div>{item.name}</div>
-                          <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>ID: {item.id} • Unit: {item.unit}</div>
-                        </td>
-                        <td>
-                          <span className="status-badge" style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-muted)", fontSize: "11px" }}>
-                            {item.category}
-                          </span>
-                        </td>
-                        <td style={{ fontSize: "16px", fontWeight: 800 }}>
-                          {item.currentStock} {item.unit}s
-                        </td>
-                        <td style={{ color: "var(--text-muted)" }}>{item.minStockThreshold} {item.unit}s</td>
-                        <td>
-                          {isOutOfStock ? (
-                            <span className="status-badge outstock">Out of Stock</span>
-                          ) : isLowStock ? (
-                            <span className="status-badge lowstock">Low Stock</span>
-                          ) : (
-                            <span className="status-badge instock">In Stock</span>
-                          )}
-                        </td>
-                        <td style={{ fontWeight: 600 }}>₱{item.unitCost.toLocaleString()}</td>
-                        <td style={{ color: item.retailPrice > 0 ? "var(--accent-emerald)" : "var(--text-dim)", fontWeight: 600 }}>
-                          {item.retailPrice > 0 ? `₱${item.retailPrice.toLocaleString()}` : "Salon Use"}
-                        </td>
-                        <td style={{ color: "var(--text-muted)", fontSize: "13px" }}>{item.supplier}</td>
-                        <td>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              className="btn-secondary"
-                              style={{ padding: "6px 12px", height: "34px", fontSize: "12px", color: "#34d399", borderColor: "rgba(16, 185, 129, 0.4)" }}
-                              onClick={() => {
-                                setSelectedProduct(item);
-                                setIsStockInModalOpen(true);
-                              }}
-                              title="Stock In / Restock"
-                            >
-                              <TrendingUp size={14} /> Stock In
-                            </button>
-                            <button
-                              className="btn-secondary"
-                              style={{ padding: "6px 12px", height: "34px", fontSize: "12px", color: "#f87171", borderColor: "rgba(239, 68, 68, 0.4)" }}
-                              onClick={() => {
-                                setSelectedProduct(item);
-                                setIsStockOutModalOpen(true);
-                              }}
-                              title="Stock Out / Usage"
-                            >
-                              <TrendingDown size={14} /> Stock Out
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                return (
+                  <div key={item.id} className="log-item" style={isLowStock ? { background: "rgba(245, 158, 11, 0.08)" } : undefined}>
+                    <div className="log-item-head">
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: "15px" }}>{item.name}</div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>ID: {item.id} • {item.category}</div>
+                      </div>
+                      {isOutOfStock ? (
+                        <span className="status-badge outstock">Out of Stock</span>
+                      ) : isLowStock ? (
+                        <span className="status-badge lowstock">Low Stock</span>
+                      ) : (
+                        <span className="status-badge instock">In Stock</span>
+                      )}
+                    </div>
+                    <div className="log-item-body">
+                      <div><span>Current Stock</span><b style={{ fontSize: "15px" }}>{item.currentStock} {item.unit}s</b></div>
+                      <div><span>Min Threshold</span><b>{item.minStockThreshold} {item.unit}s</b></div>
+                      <div><span>Unit Cost</span><b>₱{item.unitCost.toLocaleString()}</b></div>
+                      <div><span>Retail Price</span><b style={{ color: item.retailPrice > 0 ? "var(--accent-emerald)" : "var(--text-dim)" }}>{item.retailPrice > 0 ? `₱${item.retailPrice.toLocaleString()}` : "Salon Use"}</b></div>
+                      <div><span>Supplier</span><b>{item.supplier}</b></div>
+                    </div>
+                    <div className="row-actions apt-actions">
+                      <button className="btn-secondary" style={{ height: "38px", fontSize: "13px", color: "#4d7a4a" }} onClick={() => { setSelectedProduct(item); setIsStockInModalOpen(true); }} title="Stock In / Restock">
+                        <TrendingUp size={14} /> Stock In
+                      </button>
+                      <button className="btn-secondary" style={{ height: "38px", fontSize: "13px", color: "#f87171" }} onClick={() => { setSelectedProduct(item); setIsStockOutModalOpen(true); }} title="Stock Out / Usage">
+                        <TrendingDown size={14} /> Stock Out
+                      </button>
+                      <button type="button" className="icon-btn" title="Edit product" onClick={() => openEditItem(item)}><Edit size={16} /></button>
+                      <button type="button" className="icon-btn danger" title="Remove product" onClick={() => handleDeleteItem(item)}><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -380,7 +353,7 @@ const Inventory = () => {
                           </span>
                         )}
                       </td>
-                      <td style={{ fontWeight: 800, fontSize: "15px", color: log.type === "STOCK_IN" ? "#34d399" : "#f87171" }}>
+                      <td style={{ fontWeight: 800, fontSize: "15px", color: log.type === "STOCK_IN" ? "#4d7a4a" : "#f87171" }}>
                         {log.type === "STOCK_IN" ? `+${log.quantity}` : `-${log.quantity}`}
                       </td>
                       <td style={{ fontSize: "13px", color: "var(--text-muted)" }}>
@@ -402,8 +375,8 @@ const Inventory = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Add New Product to Inventory</h3>
-              <button onClick={() => setIsAddItemModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <h3 className="modal-title">{editingId ? "Edit Product" : "Add New Product to Inventory"}</h3>
+              <button type="button" onClick={() => setIsAddItemModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
             <form onSubmit={handleCreateItemSubmit}>
               <div className="modal-body">
@@ -502,7 +475,7 @@ const Inventory = () => {
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsAddItemModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">
-                  <CheckCircle size={18} /> Save Product
+                  <CheckCircle size={18} /> {editingId ? "Update Product" : "Save Product"}
                 </button>
               </div>
             </form>
@@ -515,7 +488,7 @@ const Inventory = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title" style={{ color: "#34d399", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="modal-title" style={{ color: "var(--ink)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <TrendingUp size={20} /> Stock In / Restock: {selectedProduct.name}
               </h3>
               <button onClick={() => setIsStockInModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
@@ -551,7 +524,7 @@ const Inventory = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsStockInModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+                <button type="submit" className="btn-primary" style={{ background: "linear-gradient(135deg, #8a6f7c, #6b5566)" }}>
                   Confirm Stock In
                 </button>
               </div>

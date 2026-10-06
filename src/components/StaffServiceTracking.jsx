@@ -1,3 +1,4 @@
+import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -201,53 +202,24 @@ const StaffServiceTracking = () => {
           </div>
         </div>
 
-        <div className="custom-table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Stylist Name</th>
-                <th>Role</th>
-                <th>Commission Rate</th>
-                <th>Services Done</th>
-                <th>Revenue Generated</th>
-                <th>Commission Earned</th>
-                <th>Tips Received</th>
-                <th>Total Payout</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staffMonthlyStats.map((stf) => (
-                <tr key={stf.id}>
-                  <td style={{ fontWeight: 700 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <img
-                        src={stf.avatar}
-                        alt={stf.name}
-                        style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
-                      />
-                      <span>{stf.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: "var(--text-muted)" }}>{stf.role}</td>
-                  <td>
-                    <span className="status-badge active" style={{ fontSize: "11px" }}>
-                      {stf.commissionRate}% Rate
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 700 }}>{stf.servicesDone} services</td>
-                  <td style={{ fontWeight: 700 }}>₱{stf.totalRevenue.toLocaleString()}</td>
-                  <td style={{ color: "var(--accent-emerald)", fontWeight: 700 }}>
-                    ₱{stf.totalCommission.toLocaleString()}
-                  </td>
-                  <td style={{ color: "var(--accent-amber)" }}>₱{stf.totalTips.toLocaleString()}</td>
-                  <td style={{ color: "var(--accent-rose)", fontWeight: 800, fontSize: "15px" }}>
-                    ₱{stf.totalPayout.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ExcelSheet
+          columns={[
+            { key: "name", label: "Stylist Name", style: { fontWeight: 700 } },
+            { key: "role", label: "Role", hideMd: true },
+            { key: "commissionRate", label: "Commission Rate", num: true, hideSm: true, render: (r) => `${r.commissionRate}%` },
+            { key: "servicesDone", label: "Services Done", num: true },
+            { key: "totalRevenue", label: "Revenue Generated", num: true, render: (r) => `₱${r.totalRevenue.toLocaleString()}` },
+            { key: "totalCommission", label: "Commission Earned", num: true, render: (r) => `₱${r.totalCommission.toLocaleString()}` },
+            { key: "totalTips", label: "Tips Received", num: true, render: (r) => `₱${r.totalTips.toLocaleString()}` },
+            { key: "totalPayout", label: "Total Payout", num: true, style: { fontWeight: 700 }, render: (r) => `₱${r.totalPayout.toLocaleString()}` }
+          ]}
+          rows={staffMonthlyStats}
+          totals={(() => {
+            const sum = (k) => staffMonthlyStats.reduce((a, r) => a + r[k], 0);
+            const peso = (k) => `₱${sum(k).toLocaleString()}`;
+            return { name: "TOTAL", servicesDone: sum("servicesDone"), totalRevenue: peso("totalRevenue"), totalCommission: peso("totalCommission"), totalTips: peso("totalTips"), totalPayout: peso("totalPayout") };
+          })()}
+        />
       </div>
 
       {/* SECTION 2: DETAILED STAFF SERVICE LOGS HISTORY */}
@@ -284,52 +256,26 @@ const StaffServiceTracking = () => {
           </div>
         </div>
 
-        <div className="custom-table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Date & Time</th>
-                <th>Assigned Stylist</th>
-                <th>Client</th>
-                <th>Service Rendered</th>
-                <th>Service Amount</th>
-                <th>Commission Rate</th>
-                <th>Commission Earned</th>
-                <th>Tip</th>
-                <th>Total Earnings</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTracking.length === 0 ? (
-                <tr>
-                  <td colSpan="9" style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
-                    No recorded staff services match the selected filter.
-                  </td>
-                </tr>
-              ) : (
-                filteredTracking.map((trk) => (
-                  <tr key={trk.id}>
-                    <td style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                      {new Date(trk.date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </td>
-                    <td style={{ fontWeight: 700, color: "var(--accent-rose)" }}>{trk.staffName}</td>
-                    <td>{trk.clientName}</td>
-                    <td style={{ fontWeight: 600 }}>{trk.serviceName}</td>
-                    <td style={{ fontWeight: 700 }}>₱{trk.serviceAmount.toLocaleString()}</td>
-                    <td>{trk.commissionRate}%</td>
-                    <td style={{ color: "var(--accent-emerald)", fontWeight: 700 }}>
-                      ₱{trk.commissionEarned.toLocaleString()}
-                    </td>
-                    <td style={{ color: "var(--accent-amber)" }}>₱{trk.tipAmount || 0}</td>
-                    <td style={{ fontWeight: 800, color: "var(--accent-rose)" }}>
-                      ₱{trk.totalEarnings.toLocaleString()}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {filteredTracking.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
+            No recorded staff services match the selected filter.
+          </div>
+        ) : (
+          <ExcelSheet
+            columns={[
+              { key: "date", label: "Date & Time", style: { fontSize: "13px", color: "var(--text-muted)" }, render: (t) => new Date(t.date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) },
+              { key: "staffName", label: "Assigned Stylist", style: { fontWeight: 700, color: "var(--accent-rose)" } },
+              { key: "clientName", label: "Client" },
+              { key: "serviceName", label: "Service Rendered", style: { fontWeight: 600 } },
+              { key: "serviceAmount", label: "Service Amount", style: { fontWeight: 700 }, render: (t) => `₱${t.serviceAmount.toLocaleString()}` },
+              { key: "commissionRate", label: "Commission Rate", render: (t) => `${t.commissionRate}%` },
+              { key: "commissionEarned", label: "Commission Earned", style: { fontWeight: 700, color: "var(--accent-emerald)" }, render: (t) => `₱${t.commissionEarned.toLocaleString()}` },
+              { key: "tipAmount", label: "Tip", style: { color: "var(--accent-amber)" }, render: (t) => `₱${t.tipAmount || 0}` },
+              { key: "totalEarnings", label: "Total Earnings", style: { fontWeight: 800, color: "var(--accent-rose)" }, render: (t) => `₱${t.totalEarnings.toLocaleString()}` }
+            ]}
+            rows={filteredTracking}
+          />
+        )}
       </div>
 
       {/* RECORD NEW STAFF SERVICE MODAL */}
@@ -447,7 +393,7 @@ const StaffServiceTracking = () => {
                   const comm = ((amt * rate) / 100).toFixed(2);
                   const total = (Number(comm) + Number(formData.tipAmount || 0)).toFixed(2);
                   return (
-                    <div style={{ background: "rgba(244, 63, 94, 0.1)", border: "1px solid var(--accent-rose)", padding: "14px 18px", borderRadius: "12px", marginTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ background: "rgba(138, 111, 124, 0.12)", border: "1px solid var(--accent-rose)", padding: "14px 18px", borderRadius: "12px", marginTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>Calculated Commission ({rate}%):</div>
                         <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--accent-rose)" }}>₱{comm}</div>
@@ -483,7 +429,7 @@ const StaffServiceTracking = () => {
                             type="checkbox"
                             checked={formData.selectedInventoryDeductions.includes(inv.id)}
                             onChange={() => toggleInventoryDeduction(inv.id)}
-                            style={{ accentColor: "#10b981" }}
+                            style={{ accentColor: "#8a6f7c" }}
                           />
                           <span>{inv.name} ({inv.currentStock} {inv.unit} left)</span>
                         </label>

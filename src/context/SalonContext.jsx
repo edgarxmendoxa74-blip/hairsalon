@@ -73,6 +73,11 @@ export const SalonProvider = ({ children }) => {
     showToast(`Staff updated successfully!`);
   };
 
+  const deleteStaff = (id) => {
+    setStaff((prev) => prev.filter((s) => s.id !== id));
+    showToast("Staff member removed.", "info");
+  };
+
   // --- SERVICE ACTIONS ---
   const addService = (serviceData) => {
     const newService = {
@@ -86,7 +91,7 @@ export const SalonProvider = ({ children }) => {
   };
 
   const updateService = (id, updatedData) => {
-    setServices((prev) => prev.map((s) => (s.id === id ? { ...s, ...updatedData } : s)));
+    setServices((prev) => prev.map((s) => (s.id === id ? { ...s, ...updatedData, price: Number(updatedData.price ?? s.price), duration: Number(updatedData.duration ?? s.duration) } : s)));
     showToast(`Service updated successfully!`);
   };
 
@@ -110,6 +115,16 @@ export const SalonProvider = ({ children }) => {
     return newClient;
   };
 
+  const updateClient = (id, updatedData) => {
+    setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...updatedData, vip: Boolean(updatedData.vip) } : c)));
+    showToast("Client profile updated!");
+  };
+
+  const deleteClient = (id) => {
+    setClients((prev) => prev.filter((c) => c.id !== id));
+    showToast("Client removed.", "info");
+  };
+
   // --- INVENTORY MANAGEMENT (MAIN FOCUS #2) ---
   const addInventoryItem = (itemData) => {
     const newItem = {
@@ -126,8 +141,20 @@ export const SalonProvider = ({ children }) => {
   };
 
   const updateInventoryItem = (id, updatedData) => {
-    setInventory((prev) => prev.map((i) => (i.id === id ? { ...i, ...updatedData } : i)));
+    setInventory((prev) => prev.map((i) => (i.id === id ? {
+      ...i,
+      ...updatedData,
+      currentStock: Number(updatedData.currentStock ?? i.currentStock),
+      minStockThreshold: Number(updatedData.minStockThreshold ?? i.minStockThreshold),
+      unitCost: Number(updatedData.unitCost ?? i.unitCost),
+      retailPrice: Number(updatedData.retailPrice ?? i.retailPrice ?? 0)
+    } : i)));
     showToast(`Inventory item updated!`);
+  };
+
+  const deleteInventoryItem = (id) => {
+    setInventory((prev) => prev.filter((i) => i.id !== id));
+    showToast("Inventory item removed.", "info");
   };
 
   // Stock In (Restock)
@@ -455,12 +482,16 @@ export const SalonProvider = ({ children }) => {
         // Methods
         addStaff,
         updateStaff,
+        deleteStaff,
         addService,
         updateService,
         deleteService,
         addClient,
+        updateClient,
+        deleteClient,
         addInventoryItem,
         updateInventoryItem,
+        deleteInventoryItem,
         stockInItem,
         stockOutItem,
         quickRestockLowStockItems,

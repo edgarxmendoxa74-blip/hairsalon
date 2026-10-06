@@ -12,18 +12,20 @@ import {
 } from "lucide-react";
 
 const Services = () => {
-  const { services, staff, addService, deleteService } = useSalon();
+  const { services, staff, addService, updateService, deleteService } = useSalon();
+  const [editingId, setEditingId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     name: "",
     category: "Hair Care",
     price: 500,
     duration: 45,
     description: "",
     assignedStaff: []
-  });
+  };
+  const [formData, setFormData] = useState({ ...emptyForm });
 
   const categories = ["ALL", ...new Set(services.map((s) => s.category))];
 
@@ -31,11 +33,29 @@ const Services = () => {
     (s) => selectedCategory === "ALL" || s.category === selectedCategory
   );
 
+  const openAdd = () => {
+    setEditingId(null);
+    setFormData({ ...emptyForm });
+    setIsAddModalOpen(true);
+  };
+
+  const openEdit = (srv) => {
+    setEditingId(srv.id);
+    setFormData({ ...emptyForm, ...srv });
+    setIsAddModalOpen(true);
+  };
+
+  const handleDelete = (srv) => {
+    if (window.confirm('Remove "' + srv.name + '" from the service menu?')) deleteService(srv.id);
+  };
+
   const handleCreateSubmit = (e) => {
     e.preventDefault();
-    addService(formData);
+    if (editingId) updateService(editingId, formData);
+    else addService(formData);
+    setEditingId(null);
     setIsAddModalOpen(false);
-    setFormData({ name: "", category: "Hair Care", price: 500, duration: 45, description: "", assignedStaff: [] });
+    setFormData({ ...emptyForm });
   };
 
   return (
@@ -52,7 +72,7 @@ const Services = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
+        <button className="btn-primary" onClick={openAdd}>
           <PlusCircle size={20} /> Add New Service
         </button>
       </div>
@@ -79,16 +99,13 @@ const Services = () => {
           <div key={srv.id} className="glass-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                <span className="status-badge active" style={{ fontSize: "11px", background: "rgba(236, 72, 153, 0.15)", color: "#ec4899", border: "1px solid rgba(236, 72, 153, 0.3)" }}>
+                <span className="status-badge active" style={{ fontSize: "11px", background: "rgba(138, 111, 124, 0.18)", color: "#6b5566", border: "1px solid rgba(138, 111, 124, 0.4)" }}>
                   {srv.category}
                 </span>
-                <button
-                  onClick={() => deleteService(srv.id)}
-                  style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}
-                  title="Remove Service"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="card-actions">
+                  <button type="button" className="icon-btn" title="Edit service" onClick={() => openEdit(srv)}><Edit size={16} /></button>
+                  <button type="button" className="icon-btn danger" title="Remove service" onClick={() => handleDelete(srv)}><Trash2 size={16} /></button>
+                </div>
               </div>
 
               <h3 style={{ fontSize: "18px", marginBottom: "6px" }}>{srv.name}</h3>
@@ -134,8 +151,8 @@ const Services = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Add New Service to Catalog</h3>
-              <button onClick={() => setIsAddModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <h3 className="modal-title">{editingId ? "Edit Service" : "Add New Service to Catalog"}</h3>
+              <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
             <form onSubmit={handleCreateSubmit}>
               <div className="modal-body">
@@ -201,7 +218,7 @@ const Services = () => {
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">
-                  <CheckCircle size={18} /> Save Service
+                  <CheckCircle size={18} /> {editingId ? "Update Service" : "Save Service"}
                 </button>
               </div>
             </form>

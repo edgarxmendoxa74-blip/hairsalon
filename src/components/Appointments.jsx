@@ -96,7 +96,7 @@ const Appointments = () => {
       {/* FILTERS & SEARCH */}
       <div className="glass-card" style={{ padding: "16px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="apt-filters">
             {["ALL", "Scheduled", "In-Progress", "Completed", "Cancelled"].map((status) => (
               <button
                 key={status}
@@ -125,86 +125,47 @@ const Appointments = () => {
 
       {/* APPOINTMENTS CARDS / TABLE GRID */}
       <div className="glass-card">
-        <div className="custom-table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Time & Date</th>
-                <th>Client Name</th>
-                <th>Service Booked</th>
-                <th>Assigned Stylist</th>
-                <th>Amount (₱)</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredApts.length === 0 ? (
-                <tr>
-                  <td colSpan="7" style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
-                    No appointments found.
-                  </td>
-                </tr>
-              ) : (
-                filteredApts.map((apt) => (
-                  <tr key={apt.id}>
-                    <td style={{ fontWeight: 700 }}>
-                      <div style={{ fontSize: "14px", color: "var(--accent-rose)" }}>{apt.time}</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{apt.date}</div>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{apt.clientName}</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{apt.clientPhone}</div>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{apt.serviceName}</td>
-                    <td style={{ fontWeight: 600, color: "var(--accent-purple)" }}>{apt.staffName}</td>
-                    <td style={{ fontWeight: 800 }}>₱{apt.amount.toLocaleString()}</td>
-                    <td>
-                      <span className={`status-badge ${apt.status.toLowerCase().replace("-", "")}`}>
-                        {apt.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        {apt.status === "Scheduled" && (
-                          <button
-                            className="btn-secondary"
-                            style={{ padding: "6px 12px", height: "34px", fontSize: "12px", color: "#38bdf8" }}
-                            onClick={() => updateAppointmentStatus(apt.id, "In-Progress")}
-                          >
-                            <PlayCircle size={14} /> Start Service
-                          </button>
-                        )}
-
-                        {(apt.status === "Scheduled" || apt.status === "In-Progress") && (
-                          <button
-                            className="btn-primary"
-                            style={{ padding: "6px 12px", height: "34px", fontSize: "12px" }}
-                            onClick={() => {
-                              setSelectedApt(apt);
-                              setIsCheckoutModalOpen(true);
-                            }}
-                          >
-                            <CheckCircle size={14} /> Complete & Track
-                          </button>
-                        )}
-
-                        {apt.status === "Scheduled" && (
-                          <button
-                            className="btn-secondary btn-danger"
-                            style={{ padding: "6px 10px", height: "34px", fontSize: "12px" }}
-                            onClick={() => updateAppointmentStatus(apt.id, "Cancelled")}
-                          >
-                            <XCircle size={14} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="log-column">
+          {filteredApts.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)" }}>
+              No appointments found.
+            </div>
+          ) : (
+            filteredApts.map((apt) => (
+              <div key={apt.id} className="log-item">
+                <div className="log-item-head">
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: "15px" }}>{apt.clientName}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>{apt.clientPhone}</div>
+                  </div>
+                  <span className={`status-badge ${apt.status.toLowerCase().replace("-", "")}`}>{apt.status}</span>
+                </div>
+                <div className="log-item-body">
+                  <div><span>Time & Date</span><b><span style={{ color: "var(--accent-rose)" }}>{apt.time}</span> • {apt.date}</b></div>
+                  <div><span>Service</span><b>{apt.serviceName}</b></div>
+                  <div><span>Stylist</span><b style={{ color: "var(--accent-purple)" }}>{apt.staffName}</b></div>
+                  <div><span>Amount</span><b>₱{apt.amount.toLocaleString()}</b></div>
+                </div>
+                {(apt.status === "Scheduled" || apt.status === "In-Progress") && (
+                  <div className="row-actions apt-actions">
+                    {apt.status === "Scheduled" && (
+                      <button className="btn-secondary" style={{ height: "38px", fontSize: "13px", color: "#38bdf8" }} onClick={() => updateAppointmentStatus(apt.id, "In-Progress")}>
+                        <PlayCircle size={14} /> Start Service
+                      </button>
+                    )}
+                    <button className="btn-primary" style={{ height: "38px", fontSize: "13px" }} onClick={() => { setSelectedApt(apt); setIsCheckoutModalOpen(true); }}>
+                      <CheckCircle size={14} /> Complete & Track
+                    </button>
+                    {apt.status === "Scheduled" && (
+                      <button className="btn-secondary btn-danger" style={{ height: "38px", fontSize: "13px" }} onClick={() => updateAppointmentStatus(apt.id, "Cancelled")}>
+                        <XCircle size={14} /> Cancel
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -310,7 +271,7 @@ const Appointments = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title" style={{ color: "#34d399", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="modal-title" style={{ color: "var(--ink)", display: "flex", alignItems: "center", gap: "8px" }}>
                 <CheckCircle size={20} /> Complete & Track Service: {selectedApt.clientName}
               </h3>
               <button onClick={() => setIsCheckoutModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
@@ -345,7 +306,7 @@ const Appointments = () => {
                           type="checkbox"
                           checked={selectedProductIds.includes(inv.id)}
                           onChange={() => toggleProductSelect(inv.id)}
-                          style={{ accentColor: "#10b981" }}
+                          style={{ accentColor: "#8a6f7c" }}
                         />
                         <span>{inv.name} ({inv.currentStock} {inv.unit} left)</span>
                       </label>
@@ -356,7 +317,7 @@ const Appointments = () => {
 
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsCheckoutModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+                <button type="submit" className="btn-primary" style={{ background: "linear-gradient(135deg, #8a6f7c, #6b5566)" }}>
                   <Check size={18} /> Confirm Completion & Record Commission
                 </button>
               </div>

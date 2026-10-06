@@ -1,30 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSalon } from "../context/SalonContext";
 import Navigation from "./Navigation";
-import {
-  Tablet,
-  Smartphone,
-  Maximize2,
-  Sun,
-  Moon,
-  Bell,
-  CheckCircle,
-  AlertTriangle,
-  Info,
-  Sparkles
-} from "lucide-react";
+import PageSlides from "./PageSlides";
+import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 
 const TabletShell = ({ children }) => {
-  const {
-    tabletMode,
-    setTabletMode,
-    themeMode,
-    setThemeMode,
-    toastMessage,
-    lowStockCount,
-    todayAppointmentsCount,
-    activeTab
-  } = useSalon();
+  const { toastMessage, activeTab } = useSalon();
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -36,6 +17,35 @@ const TabletShell = ({ children }) => {
   const formattedTime = currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const formattedDate = currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 
+  // Tables that do not fit the screen switch to stacked card rows (labels copied from headers)
+  useEffect(() => {
+    const root = document.querySelector(".page-body");
+    if (!root) return undefined;
+    let raf = 0;
+    const apply = () => {
+      root.querySelectorAll(".custom-table-container").forEach((box) => {
+        const table = box.querySelector("table");
+        if (!table) return;
+        const heads = [...table.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+        table.querySelectorAll("tbody tr").forEach((tr) => {
+          [...tr.children].forEach((td, i) => {
+            if (heads[i] && td.dataset.label !== heads[i]) td.dataset.label = heads[i];
+            const empty = td.textContent.trim() === "" && !td.querySelector("button, img, svg, input") ? "1" : "";
+            if ((td.dataset.empty || "") !== empty) td.dataset.empty = empty;
+          });
+        });
+        box.classList.remove("stacked");
+        if (!box.classList.contains("no-stack") && box.scrollWidth > box.clientWidth + 2) box.classList.add("stacked");
+      });
+    };
+    const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
+    schedule();
+    const mo = new MutationObserver(schedule);
+    mo.observe(root, { childList: true, subtree: true, characterData: true });
+    window.addEventListener("resize", schedule);
+    return () => { cancelAnimationFrame(raf); mo.disconnect(); window.removeEventListener("resize", schedule); };
+  }, [activeTab]);
+
   const getPageTitle = () => {
     switch (activeTab) {
       case "dashboard": return "Dashboard & Salon Overview";
@@ -46,35 +56,15 @@ const TabletShell = ({ children }) => {
       case "tracking": return "Staff Service Tracking & Performance";
       case "inventory": return "Inventory & Stock Control";
       case "sales": return "POS & Transaction Register";
+      case "analytics": return "Analytics & Trends";
       case "reports": return "Reports & Analytics";
       default: return "Salon Management";
     }
   };
 
   return (
-    <div className={`tablet-viewport-container ${tabletMode === "fullscreen" ? "fullscreen-mode" : ""} ${themeMode === "light" ? "light-mode" : ""}`}>
-      <div className={`tablet-frame ${tabletMode === "portrait" ? "portrait-mode" : ""} ${tabletMode === "fullscreen" ? "fullscreen-mode" : ""}`}>
-        
-        {/* Tablet Top Hardware / Status Bar */}
-        <div className="tablet-top-hardware-bar">
-          <div className="time-display">
-            <span>{formattedTime}</span> • <span style={{ opacity: 0.8 }}>{formattedDate}</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Sparkles size={14} color="#f59e0b" />
-            <span style={{ fontSize: "11px", letterSpacing: "0.5px", color: "#ffffff", fontWeight: 700 }}>
-              GLOW STUDIO TABLET OS
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {lowStockCount > 0 && (
-              <span style={{ color: "#f59e0b", fontSize: "11px", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-                <AlertTriangle size={12} /> {lowStockCount} Low Stock
-              </span>
-            )}
-            <span style={{ fontSize: "12px" }}>🔋 98%</span>
-          </div>
-        </div>
+    <div className="tablet-viewport-container">
+      <div className="tablet-frame">
 
         {/* Main Application Layout */}
         <div className="tablet-app-layout">
@@ -87,46 +77,15 @@ const TabletShell = ({ children }) => {
                 <h1 className="page-title">{getPageTitle()}</h1>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                {/* Tablet Frame Controls Switcher */}
-                <div className="tablet-mode-controls">
-                  <button
-                    className={`mode-btn ${tabletMode === "ipad-landscape" ? "active" : ""}`}
-                    onClick={() => setTabletMode("ipad-landscape")}
-                    title="Tablet Landscape View (1024px+)"
-                  >
-                    <Tablet size={14} /> Landscape
-                  </button>
-                  <button
-                    className={`mode-btn ${tabletMode === "portrait" ? "active" : ""}`}
-                    onClick={() => setTabletMode("portrait")}
-                    title="Tablet Portrait View (820px)"
-                  >
-                    <Smartphone size={14} /> Portrait
-                  </button>
-                  <button
-                    className={`mode-btn ${tabletMode === "fullscreen" ? "active" : ""}`}
-                    onClick={() => setTabletMode("fullscreen")}
-                    title="Full Screen Mode"
-                  >
-                    <Maximize2 size={14} /> Full
-                  </button>
-                </div>
-
-                {/* Dark / Light Theme Toggle */}
-                <button
-                  className="btn-secondary"
-                  style={{ width: "40px", height: "40px", padding: 0, borderRadius: "50%" }}
-                  onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
-                  title="Toggle Light / Dark Mode"
-                >
-                  {themeMode === "dark" ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#8b5cf6" />}
-                </button>
+              <div className="topbar-clock" style={{ textAlign: "right", color: "var(--text-muted)", lineHeight: 1.2 }}>
+                <div style={{ fontFamily: "var(--font-heading)", fontSize: 24, fontWeight: 700, color: "var(--ink)" }}>{formattedTime}</div>
+                <div style={{ fontSize: 12, letterSpacing: 1, textTransform: "uppercase" }}>{formattedDate}</div>
               </div>
             </header>
 
             {/* Page Body View */}
             <div className="page-body">
+              <PageSlides pageId={activeTab} />
               {children}
             </div>
           </main>
@@ -141,7 +100,7 @@ const TabletShell = ({ children }) => {
           ) : toastMessage.type === "info" ? (
             <Info size={20} color="#3b82f6" />
           ) : (
-            <CheckCircle size={20} color="#10b981" />
+            <CheckCircle size={20} color="#4d7a4a" />
           )}
           <span>{toastMessage.message}</span>
         </div>

@@ -8,14 +8,17 @@ import {
   Mail,
   Percent,
   CheckCircle,
-  Edit
+  Edit,
+  Trash2,
+  Upload
 } from "lucide-react";
 
 const StaffManagement = () => {
-  const { staff, addStaff, updateStaff } = useSalon();
+  const { staff, addStaff, updateStaff, deleteStaff } = useSalon();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
     name: "",
     role: "Hair Stylist",
     phone: "",
@@ -23,11 +26,52 @@ const StaffManagement = () => {
     commissionRate: 15,
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     specialties: ["Haircut", "Hair Color"]
-  });
+  };
+  const [formData, setFormData] = useState({ ...emptyForm });
+
+  const openAdd = () => {
+    setEditingId(null);
+    setFormData({ ...emptyForm });
+    setIsAddModalOpen(true);
+  };
+
+  const openEdit = (member) => {
+    setEditingId(member.id);
+    setFormData({ ...emptyForm, ...member });
+    setIsAddModalOpen(true);
+  };
+
+  // Resize to 256px max and store as a data URL so it persists in localStorage
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, 256 / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        setFormData((prev) => ({ ...prev, avatar: canvas.toDataURL("image/jpeg", 0.85) }));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDelete = (member) => {
+    if (window.confirm("Remove " + member.name + " from staff?")) deleteStaff(member.id);
+  };
 
   const handleAddSubmit = (e) => {
     e.preventDefault();
-    addStaff(formData);
+    const payload = { ...formData, commissionRate: Number(formData.commissionRate) };
+    if (editingId) updateStaff(editingId, payload);
+    else addStaff(payload);
+    setEditingId(null);
     setIsAddModalOpen(false);
     setFormData({
       name: "",
@@ -54,7 +98,7 @@ const StaffManagement = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
+        <button className="btn-primary" onClick={openAdd}>
           <PlusCircle size={20} /> Add New Staff Member
         </button>
       </div>
@@ -73,6 +117,10 @@ const StaffManagement = () => {
                 <div>
                   <h3 style={{ fontSize: "18px" }}>{member.name}</h3>
                   <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{member.role}</div>
+                </div>
+                <div className="card-actions">
+                  <button type="button" className="icon-btn" title="Edit staff" onClick={() => openEdit(member)}><Edit size={16} /></button>
+                  <button type="button" className="icon-btn danger" title="Remove staff" onClick={() => handleDelete(member)}><Trash2 size={16} /></button>
                 </div>
               </div>
 
@@ -101,7 +149,7 @@ const StaffManagement = () => {
               </div>
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 {member.specialties.map((spec) => (
-                  <span key={spec} style={{ background: "rgba(244, 63, 94, 0.15)", color: "#f43f5e", border: "1px solid rgba(244, 63, 94, 0.3)", padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600 }}>
+                  <span key={spec} style={{ background: "rgba(138, 111, 124, 0.18)", color: "#6b5566", border: "1px solid rgba(138, 111, 124, 0.4)", padding: "3px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 600 }}>
                     {spec}
                   </span>
                 ))}
@@ -116,12 +164,28 @@ const StaffManagement = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Add New Staff Member</h3>
-              <button onClick={() => setIsAddModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <h3 className="modal-title">{editingId ? "Edit Staff Member" : "Add New Staff Member"}</h3>
+              <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
             <form onSubmit={handleAddSubmit}>
               <div className="modal-body">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label>Profile Photo</label>
+                    <div className="avatar-upload">
+                      <img src={formData.avatar} alt="Profile preview" />
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        <label className="btn-secondary" style={{ cursor: "pointer", margin: 0 }}>
+                          <Upload size={16} /> Upload Image
+                          <input type="file" accept="image/*" onChange={handleImageUpload} />
+                        </label>
+                        <button type="button" className="btn-secondary" onClick={() => setFormData({ ...formData, avatar: emptyForm.avatar })}>
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="form-group" style={{ gridColumn: "span 2" }}>
                     <label>Full Name *</label>
                     <input
@@ -185,7 +249,7 @@ const StaffManagement = () => {
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">
-                  <CheckCircle size={18} /> Save Staff Profile
+                  <CheckCircle size={18} /> {editingId ? "Update Profile" : "Save Staff Profile"}
                 </button>
               </div>
             </form>

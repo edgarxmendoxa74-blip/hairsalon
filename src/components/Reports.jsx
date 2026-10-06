@@ -1,3 +1,4 @@
+import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
 import { useSalon } from "../context/SalonContext";
 import {
@@ -145,7 +146,7 @@ const Reports = () => {
                       style={{
                         height: "100%",
                         width: `${pct}%`,
-                        background: method === "GCash" ? "#06b6d4" : method === "Cash" ? "#10b981" : "#8b5cf6",
+                        background: method === "GCash" ? "#e5a458" : method === "Cash" ? "#8a6f7c" : "#d9963f",
                         borderRadius: "99px",
                         transition: "width 0.4s ease"
                       }}
@@ -192,45 +193,33 @@ const Reports = () => {
           <Award size={18} color="var(--accent-rose)" /> Staff Service & Commission Payout Report ({selectedMonth})
         </h3>
 
-        <div className="custom-table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Stylist Name</th>
-                <th>Role</th>
-                <th>Commission Rate</th>
-                <th>Total Services Done</th>
-                <th>Total Service Revenue</th>
-                <th>Commission Earned</th>
-                <th>Tips Received</th>
-                <th>Total Stylist Payout</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staff.map((stf) => {
-                const stfLogs = monthlyTracking.filter((t) => t.staffId === stf.id);
-                const count = stfLogs.length;
-                const revenue = stfLogs.reduce((acc, t) => acc + t.serviceAmount, 0);
-                const comm = stfLogs.reduce((acc, t) => acc + t.commissionEarned, 0);
-                const tips = stfLogs.reduce((acc, t) => acc + (t.tipAmount || 0), 0);
-                const payout = comm + tips;
-
-                return (
-                  <tr key={stf.id}>
-                    <td style={{ fontWeight: 700 }}>{stf.name}</td>
-                    <td style={{ color: "var(--text-muted)" }}>{stf.role}</td>
-                    <td>{stf.commissionRate}%</td>
-                    <td style={{ fontWeight: 700 }}>{count} services</td>
-                    <td style={{ fontWeight: 700 }}>₱{revenue.toLocaleString()}</td>
-                    <td style={{ color: "var(--accent-emerald)", fontWeight: 700 }}>₱{comm.toLocaleString()}</td>
-                    <td style={{ color: "var(--accent-amber)" }}>₱{tips.toLocaleString()}</td>
-                    <td style={{ color: "var(--accent-rose)", fontWeight: 800, fontSize: "15px" }}>₱{payout.toLocaleString()}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {(() => {
+          const rows = staff.map((stf) => {
+            const logs = monthlyTracking.filter((t) => t.staffId === stf.id);
+            const revenue = logs.reduce((a, t) => a + t.serviceAmount, 0);
+            const comm = logs.reduce((a, t) => a + t.commissionEarned, 0);
+            const tips = logs.reduce((a, t) => a + (t.tipAmount || 0), 0);
+            return { id: stf.id, name: stf.name, role: stf.role, rate: stf.commissionRate, count: logs.length, revenue, comm, tips, payout: comm + tips };
+          });
+          const sum = (k) => rows.reduce((a, r) => a + r[k], 0);
+          const peso = (n) => `₱${n.toLocaleString()}`;
+          return (
+            <ExcelSheet
+              columns={[
+                { key: "name", label: "Stylist Name", style: { fontWeight: 700 } },
+                { key: "role", label: "Role", hideMd: true },
+                { key: "rate", label: "Commission Rate", num: true, hideSm: true, render: (r) => `${r.rate}%` },
+                { key: "count", label: "Services Done", num: true },
+                { key: "revenue", label: "Revenue", num: true, render: (r) => peso(r.revenue) },
+                { key: "comm", label: "Commission Earned", num: true, render: (r) => peso(r.comm) },
+                { key: "tips", label: "Tips Received", num: true, render: (r) => peso(r.tips) },
+                { key: "payout", label: "Total Payout", num: true, style: { fontWeight: 700 }, render: (r) => peso(r.payout) }
+              ]}
+              rows={rows}
+              totals={{ name: "TOTAL", count: sum("count"), revenue: peso(sum("revenue")), comm: peso(sum("comm")), tips: peso(sum("tips")), payout: peso(sum("payout")) }}
+            />
+          );
+        })()}
       </div>
 
     </div>

@@ -4,8 +4,8 @@ import {
   Users,
   PlusCircle,
   Search,
-  Award,
-  Calendar,
+  Edit,
+  Trash2,
   History,
   Phone,
   Mail,
@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 
 const Clients = () => {
-  const { clients, staffTracking, sales, addClient } = useSalon();
+  const { clients, staffTracking, sales, addClient, updateClient, deleteClient } = useSalon();
+  const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClientHistory, setSelectedClientHistory] = useState(null);
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
@@ -34,9 +35,27 @@ const Clients = () => {
       c.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const openAdd = () => {
+    setEditingId(null);
+    setFormData({ name: "", phone: "", email: "", notes: "", vip: false });
+    setIsAddClientModalOpen(true);
+  };
+
+  const openEdit = (client) => {
+    setEditingId(client.id);
+    setFormData({ name: client.name, phone: client.phone, email: client.email || "", notes: client.notes || "", vip: Boolean(client.vip) });
+    setIsAddClientModalOpen(true);
+  };
+
+  const handleDelete = (client) => {
+    if (window.confirm("Remove client " + client.name + "?")) deleteClient(client.id);
+  };
+
   const handleAddSubmit = (e) => {
     e.preventDefault();
-    addClient(formData);
+    if (editingId) updateClient(editingId, formData);
+    else addClient(formData);
+    setEditingId(null);
     setIsAddClientModalOpen(false);
     setFormData({ name: "", phone: "", email: "", notes: "", vip: false });
   };
@@ -64,7 +83,7 @@ const Clients = () => {
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setIsAddClientModalOpen(true)}>
+        <button className="btn-primary" onClick={openAdd}>
           <PlusCircle size={20} /> Register New Client
         </button>
       </div>
@@ -103,6 +122,10 @@ const Clients = () => {
                     Client ID: {client.id} • Registered {client.registeredDate}
                   </div>
                 </div>
+                <div className="card-actions">
+                  <button type="button" className="icon-btn" title="Edit client" onClick={() => openEdit(client)}><Edit size={16} /></button>
+                  <button type="button" className="icon-btn danger" title="Remove client" onClick={() => handleDelete(client)}><Trash2 size={16} /></button>
+                </div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", color: "var(--text-muted)", marginBottom: "16px" }}>
@@ -136,7 +159,7 @@ const Clients = () => {
               style={{ width: "100%", justifyContent: "center" }}
               onClick={() => setSelectedClientHistory(client)}
             >
-              <History size={16} /> View Service History ({clientServiceLogs.length})
+              <History size={16} /> View Service History ({staffTracking.filter((trk) => trk.clientId === client.id).length})
             </button>
           </div>
         ))}
@@ -155,7 +178,7 @@ const Clients = () => {
                   Phone: {selectedClientHistory.phone} • Total Visits: {selectedClientHistory.totalVisits}
                 </p>
               </div>
-              <button onClick={() => setSelectedClientHistory(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <button type="button" onClick={() => setSelectedClientHistory(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
 
             <div className="modal-body">
@@ -242,8 +265,8 @@ const Clients = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Register New Customer Profile</h3>
-              <button onClick={() => setIsAddClientModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
+              <h3 className="modal-title">{editingId ? "Edit Customer Profile" : "Register New Customer Profile"}</h3>
+              <button type="button" onClick={() => setIsAddClientModalOpen(false)} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>✕</button>
             </div>
             <form onSubmit={handleAddSubmit}>
               <div className="modal-body">
@@ -310,7 +333,7 @@ const Clients = () => {
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsAddClientModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">
-                  <CheckCircle size={18} /> Register Profile
+                  <CheckCircle size={18} /> {editingId ? "Update Profile" : "Register Profile"}
                 </button>
               </div>
             </form>

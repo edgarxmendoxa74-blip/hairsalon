@@ -10,6 +10,7 @@ import StaffServiceTracking from "./components/StaffServiceTracking";
 import Inventory from "./components/Inventory";
 import Sales from "./components/Sales";
 import Reports from "./components/Reports";
+import Analytics from "./components/Analytics";
 
 const ActiveTabRenderer = () => {
   const { activeTab } = useSalon();
@@ -31,6 +32,8 @@ const ActiveTabRenderer = () => {
       return <Inventory />;
     case "sales":
       return <Sales />;
+    case "analytics":
+      return <Analytics />;
     case "reports":
       return <Reports />;
     default:
