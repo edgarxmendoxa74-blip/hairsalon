@@ -13,7 +13,8 @@ import {
   BarChart3,
   LogOut,
   LineChart,
-  MessageSquare
+  MessageSquare,
+  Store
 } from "lucide-react";
 
 const Navigation = () => {
@@ -31,7 +32,8 @@ const Navigation = () => {
     { id: "sales", label: "Sales & POS", icon: CreditCard },
     { id: "analytics", label: "Analytics", icon: LineChart },
     { id: "sms", label: "SMS", icon: MessageSquare },
-    { id: "reports", label: "Reports", icon: BarChart3 }
+    { id: "reports", label: "Reports", icon: BarChart3 },
+    { id: "business", label: "Business Details", icon: Store }
   ];
 
   return (

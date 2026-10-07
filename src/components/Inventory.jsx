@@ -34,6 +34,7 @@ const Inventory = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const [lowOnly, setLowOnly] = useState(false);
   const [activeTabSub, setActiveTabSub] = useState("catalog"); // 'catalog' vs 'logs'
 
   // Modals state
@@ -66,7 +67,8 @@ const Inventory = () => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCat && matchesSearch;
+    const matchesLow = !lowOnly || item.currentStock <= item.minStockThreshold;
+    return matchesCat && matchesSearch && matchesLow;
   });
 
   // Calculate stock valuation
@@ -167,10 +169,17 @@ const Inventory = () => {
                 </p>
               </div>
             </div>
-            <button className="btn-secondary" style={{ borderColor: "var(--accent-gold)", color: "var(--accent-forest)" }} onClick={() => setSelectedCategory("ALL")}>
+            <button className="btn-secondary" style={{ borderColor: "var(--accent-gold)", color: "var(--accent-forest)" }} onClick={() => { setLowOnly(true); setSelectedCategory("ALL"); setSearchTerm(""); setActiveTabSub("catalog"); }}>
               Review Items
             </button>
           </div>
+        </div>
+      )}
+
+      {lowOnly && (
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "14px" }}>
+          <span>Showing {filteredInventory.length} low-stock item{filteredInventory.length === 1 ? "" : "s"} only</span>
+          <button type="button" className="btn-secondary" onClick={() => setLowOnly(false)}>Show all items</button>
         </div>
       )}
 

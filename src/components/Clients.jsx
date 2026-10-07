@@ -13,8 +13,11 @@ import {
   Phone,
   Mail,
   CheckCircle,
-  Star
+  Star,
+  MapPin
 } from "lucide-react";
+
+const formatAddress = (c) => c.location || "";
 
 const Clients = () => {
   const { money } = useCurrency();
@@ -24,13 +27,7 @@ const Clients = () => {
   const [selectedClientHistory, setSelectedClientHistory] = useState(null);
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    notes: "",
-    vip: false
-  });
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "", location: "", notes: "", vip: false });
 
   const [clientCategory, setClientCategory] = useState("ALL");
   const clientCategoryOf = {
@@ -53,13 +50,13 @@ const Clients = () => {
 
   const openAdd = () => {
     setEditingId(null);
-    setFormData({ name: "", phone: "", email: "", notes: "", vip: false });
+    setFormData({ name: "", phone: "", email: "", location: "", notes: "", vip: false });
     setIsAddClientModalOpen(true);
   };
 
   const openEdit = (client) => {
     setEditingId(client.id);
-    setFormData({ name: client.name, phone: client.phone, email: client.email || "", notes: client.notes || "", vip: Boolean(client.vip) });
+    setFormData({ name: client.name, phone: client.phone, email: client.email || "", location: client.location || "", notes: client.notes || "", vip: Boolean(client.vip) });
     setIsAddClientModalOpen(true);
   };
 
@@ -73,7 +70,7 @@ const Clients = () => {
     else addClient(formData);
     setEditingId(null);
     setIsAddClientModalOpen(false);
-    setFormData({ name: "", phone: "", email: "", notes: "", vip: false });
+    setFormData({ name: "", phone: "", email: "", location: "", notes: "", vip: false });
   };
 
   // Get service history logs for selected client
@@ -100,7 +97,7 @@ const Clients = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="clients" rows={filteredClients} columns={[{ label: "Client ID", value: (c) => c.id }, { label: "Name", value: (c) => c.name }, { label: "Phone", value: (c) => c.phone }, { label: "Email", value: (c) => c.email }, { label: "VIP", value: (c) => (c.vip ? "Yes" : "No") }, { label: "Total Visits", value: (c) => c.totalVisits }, { label: "Total Spent (PHP)", value: (c) => c.totalSpent }, { label: "Registered", value: (c) => c.registeredDate }, { label: "Notes", value: (c) => c.notes }, { label: "Last Treatment Notes", value: (c) => { const r = c.treatmentRecords?.[0]; return r ? [r.productsUsed?.join(", "), r.notes].filter(Boolean).join(" — ") : ""; } }]} />
+          <ExportButton filename="clients" rows={filteredClients} columns={[{ label: "Client ID", value: (c) => c.id }, { label: "Name", value: (c) => c.name }, { label: "Phone", value: (c) => c.phone }, { label: "Email", value: (c) => c.email }, { label: "Location", value: (c) => formatAddress(c) }, { label: "VIP", value: (c) => (c.vip ? "Yes" : "No") }, { label: "Total Visits", value: (c) => c.totalVisits }, { label: "Total Spent (PHP)", value: (c) => c.totalSpent }, { label: "Registered", value: (c) => c.registeredDate }, { label: "Notes", value: (c) => c.notes }, { label: "Last Treatment Notes", value: (c) => { const r = c.treatmentRecords?.[0]; return r ? [r.productsUsed?.join(", "), r.notes].filter(Boolean).join(" — ") : ""; } }]} />
           <button className="btn-primary" onClick={openAdd}>
             <PlusCircle size={20} /> Register New Client
           </button>
@@ -156,6 +153,11 @@ const Clients = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <Mail size={14} color="var(--accent-sky)" /> {client.email}
                 </div>
+                {formatAddress(client) && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <MapPin size={14} color="var(--accent-emerald)" /> {formatAddress(client)}
+                  </div>
+                )}
                 {client.treatmentRecords?.[0] && (
                   <div className="client-last-record">
                     <b>Last visit ({new Date(client.treatmentRecords[0].date).toLocaleDateString()}):</b>{" "}
@@ -348,6 +350,17 @@ const Clients = () => {
                       placeholder="client@gmail.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ gridColumn: "span 2" }}>
+                    <label>Location</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Makati City"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     />
                   </div>
 

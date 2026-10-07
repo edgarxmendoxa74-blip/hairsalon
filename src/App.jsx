@@ -15,6 +15,7 @@ import Sales from "./components/Sales";
 import Reports from "./components/Reports";
 import Analytics from "./components/Analytics";
 import SmsCenter from "./components/SmsCenter";
+import BusinessDetails from "./components/BusinessDetails";
 
 const ActiveTabRenderer = () => {
   const { activeTab } = useSalon();
@@ -40,6 +41,8 @@ const ActiveTabRenderer = () => {
       return <SmsCenter />;
     case "analytics":
       return <Analytics />;
+    case "business":
+      return <BusinessDetails />;
     case "reports":
       return <Reports />;
     default:

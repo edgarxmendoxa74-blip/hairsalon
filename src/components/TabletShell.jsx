@@ -21,8 +21,10 @@ const TabletShell = ({ children }) => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [zone, setZone] = useState(loadZone);
+  const [rateText, setRateText] = useState(String(rate));
   const chooseZone = (z) => {
     setZone(z);
+    setCurrency(z === "MO" ? "USD" : "PHP");
     try { localStorage.setItem(ZONE_KEY, z); } catch { /* storage unavailable */ }
   };
 
@@ -75,6 +77,7 @@ const TabletShell = ({ children }) => {
       case "sales": return "POS & Transaction Register";
       case "sms": return "SMS Center";
       case "analytics": return "Analytics & Trends";
+      case "business": return "Business Details";
       case "reports": return "Reports & Analytics";
       default: return "Salon Management";
     }
@@ -100,19 +103,19 @@ const TabletShell = ({ children }) => {
                   <button type="button" className={currency === "PHP" ? "active" : ""} onClick={() => setCurrency("PHP")}>₱ PHP</button>
                   <button type="button" className={currency === "USD" ? "active" : ""} onClick={() => setCurrency("USD")}>$ USD</button>
                 </div>
+                <div className="currency-toggle" title="Display time zone">
+                  <button type="button" className={zone === "PH" ? "active" : ""} onClick={() => chooseZone("PH")}>Philippines</button>
+                  <button type="button" className={zone === "MO" ? "active" : ""} onClick={() => chooseZone("MO")}>Macau</button>
+                </div>
                 {currency === "USD" && (
                   <label className="currency-rate">
                     $1 = ₱
-                    <input type="number" min="1" step="0.01" value={rate} onChange={(e) => setRate(e.target.value)} />
+                    <input type="number" min="1" step="0.01" value={rateText} onChange={(e) => { setRateText(e.target.value); if (Number(e.target.value) > 0) setRate(e.target.value); }} onBlur={() => setRateText(String(rate))} />
                   </label>
                 )}
               </div>
 
               <div className="topbar-clock">
-                <div className="currency-toggle zone-toggle" title="Display time zone">
-                  <button type="button" className={zone === "PH" ? "active" : ""} onClick={() => chooseZone("PH")}>Philippines</button>
-                  <button type="button" className={zone === "MO" ? "active" : ""} onClick={() => chooseZone("MO")}>Macau</button>
-                </div>
                 <div className="clock-time">{formattedTime}</div>
                 <div className="clock-date">{formattedDate}</div>
               </div>

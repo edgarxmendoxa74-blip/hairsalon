@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import { useBusinessInfo } from "../utils/businessInfo";
 import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips, { buildOptions } from "./CategoryChips";
 import React, { useState, useEffect } from "react";
@@ -26,6 +27,8 @@ const Sales = () => {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   // POS builder state
+  const business = useBusinessInfo();
+  const locationOf = (clientId) => clients.find((c) => c.id === clientId)?.location || "";
   const [posClientId, setPosClientId] = useState(clients[0]?.id || "");
   const [cartItems, setCartItems] = useState([]);
   const [discountAmt, setDiscountAmt] = useState(0);
@@ -73,10 +76,7 @@ const Sales = () => {
   const handlePOSSubmit = (e) => {
     e.preventDefault();
     if (cartItems.length === 0) return;
-    if (posStep === 1) {
-      setPosStep(2);
-      return;
-    }
+    if (posStep === 1) return;
 
     const newSale = recordPOSSale({
       clientId: posClientId,
@@ -107,7 +107,7 @@ const Sales = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="sales" rows={filteredSales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Items", value: (t) => t.items.map((i) => i.name + ' (x' + i.qty + ')').join('; ') }, { label: "Subtotal (PHP)", value: (t) => t.subtotal }, { label: "Discount (PHP)", value: (t) => t.discount }, { label: "Tax (PHP)", value: (t) => t.tax }, { label: "Total Paid (PHP)", value: (t) => t.total }]} />
+          <ExportButton filename="sales" rows={filteredSales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Location", value: (t) => locationOf(t.clientId) }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Items", value: (t) => t.items.map((i) => i.name + ' (x' + i.qty + ')').join('; ') }, { label: "Subtotal (PHP)", value: (t) => t.subtotal }, { label: "Discount (PHP)", value: (t) => t.discount }, { label: "Tax (PHP)", value: (t) => t.tax }, { label: "Total Paid (PHP)", value: (t) => t.total }]} />
           <button className="btn-primary" onClick={() => setIsPOSModalOpen(true)}>
             <ShoppingBag size={20} /> New POS Transaction
           </button>
@@ -160,7 +160,10 @@ const Sales = () => {
                     <td style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                       {new Date(s.date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </td>
-                    <td style={{ fontWeight: 700 }}>{s.clientName}</td>
+                    <td style={{ fontWeight: 700 }}>
+                      {s.clientName}
+                      {locationOf(s.clientId) && <div style={{ fontWeight: 400, fontSize: "12px", color: "var(--text-muted)" }}>{locationOf(s.clientId)}</div>}
+                    </td>
                     <td>
                       <span className="status-badge completed">{s.paymentMethod}</span>
                     </td>
@@ -199,9 +202,9 @@ const Sales = () => {
             </div>
 
             <div className="pos-steps">
-              <div className={`pos-step ${posStep === 1 ? "active" : "done"}`}><span>1</span> Client & Items</div>
+              <div className={`pos-step ${posStep === 1 ? "active" : "done"}`} style={{ cursor: cartItems.length ? "pointer" : "default" }} onClick={() => setPosStep(1)}><span>1</span> Client & Items</div>
               <div className="pos-step-line" />
-              <div className={`pos-step ${posStep === 2 ? "active" : ""}`}><span>2</span> Review & Payment</div>
+              <div className={`pos-step ${posStep === 2 ? "active" : ""}`} style={{ cursor: cartItems.length ? "pointer" : "default" }} onClick={() => cartItems.length > 0 && setPosStep(2)}><span>2</span> Review & Payment</div>
             </div>
 
             <form onSubmit={handlePOSSubmit}>
@@ -213,7 +216,7 @@ const Sales = () => {
                       <select className="form-control" value={posClientId} onChange={(e) => setPosClientId(e.target.value)}>
                         <option value="">Walk-in Customer</option>
                         {clients.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
+                          <option key={c.id} value={c.id}>{c.name} ({c.phone}){c.location ? ` · ${c.location}` : ""}</option>
                         ))}
                       </select>
                     </div>
@@ -290,7 +293,7 @@ const Sales = () => {
                 {posStep === 1 ? (
                   <>
                     <button type="button" className="btn-secondary" onClick={() => setIsPOSModalOpen(false)}>Cancel</button>
-                    <button type="submit" className="btn-primary" disabled={cartItems.length === 0}>
+                    <button key="pos-next" type="button" className="btn-primary" disabled={cartItems.length === 0} onClick={() => setPosStep(2)}>
                       Next: Review Order <ArrowRight size={18} />
                     </button>
                   </>
@@ -299,7 +302,7 @@ const Sales = () => {
                     <button type="button" className="btn-secondary" onClick={() => setPosStep(1)}>
                       <ArrowLeft size={18} /> Back
                     </button>
-                    <button type="submit" className="btn-primary" disabled={cartItems.length === 0}>
+                    <button key="pos-pay" type="submit" className="btn-primary" disabled={cartItems.length === 0}>
                       <CheckCircle size={18} /> Process Payment & Complete
                     </button>
                   </>
@@ -320,14 +323,19 @@ const Sales = () => {
             </div>
             <div className="modal-body" style={{ fontFamily: "monospace", fontSize: "13px" }}>
               <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "18px" }}>FIX SALON · YOUR HAIR SPECIALIST</h3>
-                <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>123 Metro Manila Ave, PH</div>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "18px" }}>{(business.name || "Fix Salon").toUpperCase()}</h3>
+                {business.address && <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>{business.address}</div>}
+                {business.location && <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>{business.location}</div>}
+                {business.phone && <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>Tel: {business.phone}</div>}
+                {business.facebook && <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>Facebook: {business.facebook}</div>}
+                {business.instagram && <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>Instagram: {business.instagram}</div>}
                 <div style={{ marginTop: "8px", fontWeight: 700 }}>Receipt #{selectedReceipt.id}</div>
                 <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>{new Date(selectedReceipt.date).toLocaleString()}</div>
               </div>
 
               <div style={{ borderTop: "1px dashed var(--border-color)", borderBottom: "1px dashed var(--border-color)", padding: "12px 0", marginBottom: "12px" }}>
                 <div>Client: {selectedReceipt.clientName}</div>
+                {locationOf(selectedReceipt.clientId) && <div>Location: {locationOf(selectedReceipt.clientId)}</div>}
                 <div>Payment Method: {selectedReceipt.paymentMethod}</div>
               </div>
 
