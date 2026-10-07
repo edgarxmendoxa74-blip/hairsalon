@@ -5,19 +5,34 @@ import Navigation from "./Navigation";
 import PageSlides from "./PageSlides";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 
+const ZONES = {
+  PH: { tz: "Asia/Manila" },
+  MO: { tz: "Asia/Macau" }
+};
+const ZONE_KEY = "glow_salon_timezone";
+const loadZone = () => {
+  try { const z = localStorage.getItem(ZONE_KEY); if (ZONES[z]) return z; } catch { /* ignore */ }
+  return "PH";
+};
+
 const TabletShell = ({ children }) => {
   const { toastMessage, activeTab } = useSalon();
   const { currency, setCurrency, rate, setRate } = useCurrency();
 
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [zone, setZone] = useState(loadZone);
+  const chooseZone = (z) => {
+    setZone(z);
+    try { localStorage.setItem(ZONE_KEY, z); } catch { /* storage unavailable */ }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const formattedTime = currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const formattedDate = currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const formattedTime = currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: ZONES[zone].tz });
+  const formattedDate = currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: ZONES[zone].tz });
 
   // Tables that do not fit the screen switch to stacked card rows (labels copied from headers)
   useEffect(() => {
@@ -93,9 +108,13 @@ const TabletShell = ({ children }) => {
                 )}
               </div>
 
-              <div className="topbar-clock" style={{ textAlign: "right", color: "var(--text-muted)", lineHeight: 1.2 }}>
-                <div style={{ fontFamily: "var(--font-heading)", fontSize: 24, fontWeight: 700, color: "var(--ink)" }}>{formattedTime}</div>
-                <div style={{ fontSize: 12, letterSpacing: 1, textTransform: "uppercase" }}>{formattedDate}</div>
+              <div className="topbar-clock">
+                <div className="currency-toggle zone-toggle" title="Display time zone">
+                  <button type="button" className={zone === "PH" ? "active" : ""} onClick={() => chooseZone("PH")}>Philippines</button>
+                  <button type="button" className={zone === "MO" ? "active" : ""} onClick={() => chooseZone("MO")}>Macau</button>
+                </div>
+                <div className="clock-time">{formattedTime}</div>
+                <div className="clock-date">{formattedDate}</div>
               </div>
             </header>
 
