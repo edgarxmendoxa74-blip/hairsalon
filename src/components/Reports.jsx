@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import PaymentLogo from "./PaymentLogo";
 import { useCurrency } from "../context/CurrencyContext";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
@@ -41,7 +42,7 @@ const Reports = () => {
   const sortedServicesReport = Object.entries(serviceCountMap).sort((a, b) => b[1].revenue - a[1].revenue);
 
   // Payment method breakdown
-  const paymentBreakdown = { Cash: 0, GCash: 0, Card: 0 };
+  const paymentBreakdown = { Cash: 0, GCash: 0, PayMaya: 0, MPay: 0, Card: 0 };
   monthlySales.forEach((s) => {
     if (paymentBreakdown[s.paymentMethod] !== undefined) {
       paymentBreakdown[s.paymentMethod] += s.total;
@@ -152,7 +153,7 @@ const Reports = () => {
               return (
                 <div key={method}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", fontWeight: 600, marginBottom: "6px" }}>
-                    <span>{method}</span>
+                    <PaymentLogo method={method} />
                     <span>{money(amount)} ({pct}%)</span>
                   </div>
                   <div style={{ height: "10px", background: "var(--bg-input)", borderRadius: "99px", overflow: "hidden" }}>
@@ -160,7 +161,7 @@ const Reports = () => {
                       style={{
                         height: "100%",
                         width: `${pct}%`,
-                        background: method === "GCash" ? "#e5a458" : method === "Cash" ? "#8a6f7c" : "#d9963f",
+                        background: { GCash: "#e5a458", PayMaya: "#5aa469", MPay: "#c0504d", Cash: "#8a6f7c" }[method] || "#d9963f",
                         borderRadius: "99px",
                         transition: "width 0.4s ease"
                       }}

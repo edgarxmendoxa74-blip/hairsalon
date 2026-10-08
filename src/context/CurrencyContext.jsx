@@ -17,7 +17,7 @@ export const CurrencyProvider = ({ children }) => {
     return {
       currency: settings.code,
       rate: settings.rate,
-      symbol: settings.code === "USD" ? "$" : "₱",
+      symbol: settings.code === "MOP" ? "MOP$" : "₱",
       money: (amount) => formatMoneyWith(settings, amount),
       setCurrency: (code) => update({ code }),
       setRate: (rate) => update({ rate: Number(rate) > 0 ? Number(rate) : settings.rate })

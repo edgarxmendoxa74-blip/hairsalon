@@ -104,7 +104,7 @@ const Services = () => {
             <Scissors size={26} color="var(--accent-pink)" /> Service List, Pricing & Duration
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
-            Catalog of salon services, pricing in PHP or USD (switch at the top right), duration in minutes, and assigned qualified staff.
+            Catalog of salon services, pricing in PHP or MOP (switch at the top right), duration in minutes, and assigned qualified staff.
           </p>
         </div>
 

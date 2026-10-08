@@ -24,7 +24,7 @@ const TabletShell = ({ children }) => {
   const [rateText, setRateText] = useState(String(rate));
   const chooseZone = (z) => {
     setZone(z);
-    setCurrency(z === "MO" ? "USD" : "PHP");
+    setCurrency(z === "MO" ? "MOP" : "PHP");
     try { localStorage.setItem(ZONE_KEY, z); } catch { /* storage unavailable */ }
   };
 
@@ -101,15 +101,15 @@ const TabletShell = ({ children }) => {
               <div className="currency-switch" title="Display currency. Prices are stored in PHP.">
                 <div className="currency-toggle">
                   <button type="button" className={currency === "PHP" ? "active" : ""} onClick={() => setCurrency("PHP")}>₱ PHP</button>
-                  <button type="button" className={currency === "USD" ? "active" : ""} onClick={() => setCurrency("USD")}>$ USD</button>
+                  <button type="button" className={currency === "MOP" ? "active" : ""} onClick={() => setCurrency("MOP")}>MOP$ MOP</button>
                 </div>
                 <div className="currency-toggle" title="Display time zone">
                   <button type="button" className={zone === "PH" ? "active" : ""} onClick={() => chooseZone("PH")}>Philippines</button>
                   <button type="button" className={zone === "MO" ? "active" : ""} onClick={() => chooseZone("MO")}>Macau</button>
                 </div>
-                {currency === "USD" && (
+                {currency === "MOP" && (
                   <label className="currency-rate">
-                    $1 = ₱
+                    MOP$1 = ₱
                     <input type="number" min="1" step="0.01" value={rateText} onChange={(e) => { setRateText(e.target.value); if (Number(e.target.value) > 0) setRate(e.target.value); }} onBlur={() => setRateText(String(rate))} />
                   </label>
                 )}

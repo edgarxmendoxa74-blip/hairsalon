@@ -1,4 +1,5 @@
 import ExportButton from "./ExportButton";
+import PaymentLogo from "./PaymentLogo";
 import { useBusinessInfo } from "../utils/businessInfo";
 import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips, { buildOptions } from "./CategoryChips";
@@ -102,7 +103,7 @@ const Sales = () => {
             <CreditCard size={26} color="var(--accent-emerald)" /> Sales & POS Transaction Register
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
-            Checkout point-of-sale register, payment methods (Cash, GCash, Card), and itemized billing receipts.
+            Checkout point-of-sale register, payment methods (Cash, GCash, PayMaya, MPay, Card), and itemized billing receipts.
           </p>
         </div>
 
@@ -165,7 +166,7 @@ const Sales = () => {
                       {locationOf(s.clientId) && <div style={{ fontWeight: 400, fontSize: "12px", color: "var(--text-muted)" }}>{locationOf(s.clientId)}</div>}
                     </td>
                     <td>
-                      <span className="status-badge completed">{s.paymentMethod}</span>
+                      <span className="status-badge completed"><PaymentLogo method={s.paymentMethod} size={16} /></span>
                     </td>
                     <td style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                       {s.items.map((i) => `${i.name} (x${i.qty})`).join(", ")}
@@ -272,11 +273,13 @@ const Sales = () => {
                       </div>
                       <div className="form-group">
                         <label>Payment Method *</label>
-                        <select className="form-control" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                          <option value="Cash">Cash</option>
-                          <option value="GCash">GCash / Maya</option>
-                          <option value="Card">Credit / Debit Card</option>
-                        </select>
+                        <div className="pay-picker">
+                          {["Cash", "GCash", "PayMaya", "MPay", "Card"].map((m) => (
+                            <button key={m} type="button" className={"pay-option" + (paymentMethod === m ? " active" : "")} onClick={() => setPaymentMethod(m)}>
+                              <PaymentLogo method={m} size={26} />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
 

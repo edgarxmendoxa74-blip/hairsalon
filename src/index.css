@@ -1353,3 +1353,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 .currency-rate input { -moz-appearance: textfield; appearance: textfield; }
 .currency-rate input::-webkit-outer-spin-button,
 .currency-rate input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.pay-logo { display: inline-flex; align-items: center; gap: 6px; }
+.pay-logo img { border-radius: 22%; object-fit: cover; }
+.pay-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.pay-option { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--border-color); background: var(--bg-input); font-size: 13px; font-weight: 600; cursor: pointer; color: inherit; }
+.pay-option.active { border-color: var(--mauve-deep); background: var(--cream-deep); }
