@@ -1,15 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { formatMoney } from "../utils/currency";
-import {
-  initialStaff,
-  initialServices,
-  initialClients,
-  initialInventory,
-  initialInventoryLogs,
-  initialAppointments,
-  initialStaffServiceTracking,
-  initialSales
-} from "../data/mockData";
+// Bump this to wipe all saved salon data once (e.g. when clearing demo data)
+const DATA_VERSION = "2";
+const DATA_KEYS = ["staff", "services", "clients", "inventory", "inventoryLogs", "appointments", "staffTracking", "sales"];
+try {
+  if (localStorage.getItem("glow_salon_dataVersion") !== DATA_VERSION) {
+    DATA_KEYS.forEach((k) => localStorage.removeItem(`glow_salon_${k}`));
+    localStorage.setItem("glow_salon_dataVersion", DATA_VERSION);
+  }
+} catch (e) {
+  console.error("Error resetting stored data:", e);
+}
 
 const SalonContext = createContext();
 
@@ -25,14 +26,14 @@ export const SalonProvider = ({ children }) => {
     }
   };
 
-  const [staff, setStaff] = useState(() => getStoredData("staff", initialStaff));
-  const [services, setServices] = useState(() => getStoredData("services", initialServices));
-  const [clients, setClients] = useState(() => getStoredData("clients", initialClients));
-  const [inventory, setInventory] = useState(() => getStoredData("inventory", initialInventory));
-  const [inventoryLogs, setInventoryLogs] = useState(() => getStoredData("inventoryLogs", initialInventoryLogs));
-  const [appointments, setAppointments] = useState(() => getStoredData("appointments", initialAppointments));
-  const [staffTracking, setStaffTracking] = useState(() => getStoredData("staffTracking", initialStaffServiceTracking));
-  const [sales, setSales] = useState(() => getStoredData("sales", initialSales));
+  const [staff, setStaff] = useState(() => getStoredData("staff", []));
+  const [services, setServices] = useState(() => getStoredData("services", []));
+  const [clients, setClients] = useState(() => getStoredData("clients", []));
+  const [inventory, setInventory] = useState(() => getStoredData("inventory", []));
+  const [inventoryLogs, setInventoryLogs] = useState(() => getStoredData("inventoryLogs", []));
+  const [appointments, setAppointments] = useState(() => getStoredData("appointments", []));
+  const [staffTracking, setStaffTracking] = useState(() => getStoredData("staffTracking", []));
+  const [sales, setSales] = useState(() => getStoredData("sales", []));
 
   // UX & Tablet View state
   const [activeTab, setActiveTab] = useState("dashboard");
