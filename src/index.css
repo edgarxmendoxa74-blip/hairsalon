@@ -1356,6 +1356,11 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
 
 .pay-logo { display: inline-flex; align-items: center; gap: 6px; }
 .pay-logo img { border-radius: 22%; object-fit: cover; }
-.pay-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.pay-option { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--border-color); background: var(--bg-input); font-size: 13px; font-weight: 600; cursor: pointer; color: inherit; }
+.pay-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.pay-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--border-color); background: var(--bg-input); font-size: 13px; font-weight: 600; cursor: pointer; color: inherit; }
 .pay-option.active { border-color: var(--mauve-deep); background: var(--cream-deep); }
+.pay-edit-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pay-edit-row .form-control { flex: 1; min-width: 140px; }
+.pay-edit-logo { width: 44px; height: 44px; border-radius: 12px; border: 1px dashed var(--border-color); display: grid; place-items: center; cursor: pointer; background: var(--bg-input); overflow: hidden; flex-shrink: 0; }
+.pay-edit-logo img { border-radius: 22%; }
+.pay-edit-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }

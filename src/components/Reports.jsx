@@ -1,5 +1,6 @@
 import ExportButton from "./ExportButton";
 import PaymentLogo from "./PaymentLogo";
+import { usePaymentMethods } from "../utils/paymentMethods";
 import { useCurrency } from "../context/CurrencyContext";
 import ExcelSheet from "./ExcelSheet";
 import React, { useState } from "react";
@@ -18,6 +19,7 @@ import {
 const Reports = () => {
   const { money } = useCurrency();
   const { sales, staffTracking, services, inventory, staff } = useSalon();
+  const payMethods = usePaymentMethods();
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // "2026-10"
 
   // Filter sales for selected month
@@ -42,11 +44,10 @@ const Reports = () => {
   const sortedServicesReport = Object.entries(serviceCountMap).sort((a, b) => b[1].revenue - a[1].revenue);
 
   // Payment method breakdown
-  const paymentBreakdown = { Cash: 0, GCash: 0, PayMaya: 0, MPay: 0, Card: 0 };
+  const paymentBreakdown = {};
+  payMethods.forEach((m) => { if (m.enabled !== false) paymentBreakdown[m.id] = 0; });
   monthlySales.forEach((s) => {
-    if (paymentBreakdown[s.paymentMethod] !== undefined) {
-      paymentBreakdown[s.paymentMethod] += s.total;
-    }
+    paymentBreakdown[s.paymentMethod] = (paymentBreakdown[s.paymentMethod] || 0) + s.total;
   });
 
   // Payout report rows (shared by the table and the CSV export)

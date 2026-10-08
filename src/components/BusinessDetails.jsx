@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Store, CheckCircle } from "lucide-react";
 import { useSalon } from "../context/SalonContext";
+import PaymentMethodsEditor from "./PaymentMethodsEditor";
 import { useBusinessInfo, saveBusinessInfo } from "../utils/businessInfo";
 
 const FIELDS = [
@@ -54,6 +55,8 @@ const BusinessDetails = () => {
           <button type="button" className="btn-secondary" onClick={() => setForm(saved)}>Reset</button>
         </div>
       </form>
+
+      <PaymentMethodsEditor />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import ExportButton from "./ExportButton";
 import PaymentLogo from "./PaymentLogo";
+import { usePaymentMethods } from "../utils/paymentMethods";
 import { useBusinessInfo } from "../utils/businessInfo";
 import { useCurrency } from "../context/CurrencyContext";
 import CategoryChips, { buildOptions } from "./CategoryChips";
@@ -34,6 +35,7 @@ const Sales = () => {
   const [cartItems, setCartItems] = useState([]);
   const [discountAmt, setDiscountAmt] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("GCash");
+  const payMethods = usePaymentMethods();
 
   const [paymentFilter, setPaymentFilter] = useState("ALL");
 
@@ -271,12 +273,12 @@ const Sales = () => {
                         <label>Discount Amount (₱ PHP)</label>
                         <input type="number" min="0" className="form-control" value={discountAmt} onChange={(e) => setDiscountAmt(e.target.value)} />
                       </div>
-                      <div className="form-group">
+                      <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                         <label>Payment Method *</label>
                         <div className="pay-picker">
-                          {["Cash", "GCash", "PayMaya", "MPay", "Card"].map((m) => (
-                            <button key={m} type="button" className={"pay-option" + (paymentMethod === m ? " active" : "")} onClick={() => setPaymentMethod(m)}>
-                              <PaymentLogo method={m} size={26} />
+                          {payMethods.filter((m) => m.enabled !== false).map((m) => (
+                            <button key={m.id} type="button" className={"pay-option" + (paymentMethod === m.id ? " active" : "")} onClick={() => setPaymentMethod(m.id)}>
+                              <PaymentLogo method={m.id} size={26} />
                             </button>
                           ))}
                         </div>
