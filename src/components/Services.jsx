@@ -242,7 +242,7 @@ const Services = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Price (₱ PHP) *</label>
+                    <label>Price (MOP$) *</label>
                     <input
                       type="number"
                       className="form-control"
