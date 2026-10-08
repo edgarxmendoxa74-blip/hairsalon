@@ -104,12 +104,12 @@ const Services = () => {
             <Scissors size={26} color="var(--accent-pink)" /> Service List, Pricing & Duration
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
-            Catalog of salon services, pricing in PHP or MOP (switch at the top right), duration in minutes, and assigned qualified staff.
+            Catalog of salon services, pricing in MOP, duration in minutes, and assigned qualified staff.
           </p>
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="services" rows={filteredServices} columns={[{ label: "Service ID", value: (v) => v.id }, { label: "Name", value: (v) => v.name }, { label: "Category", value: (v) => v.category }, { label: "Price (PHP)", value: (v) => v.price }, { label: "Duration (min)", value: (v) => v.duration }, { label: "Description", value: (v) => v.description }]} />
+          <ExportButton filename="services" rows={filteredServices} columns={[{ label: "Service ID", value: (v) => v.id }, { label: "Name", value: (v) => v.name }, { label: "Category", value: (v) => v.category }, { label: "Price (MOP)", value: (v) => v.price }, { label: "Duration (min)", value: (v) => v.duration }, { label: "Description", value: (v) => v.description }]} />
           <button type="button" className="btn-secondary" onClick={() => setIsAddingCategory(true)}>
             <PlusCircle size={18} /> Add Category
           </button>

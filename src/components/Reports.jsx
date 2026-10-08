@@ -89,8 +89,8 @@ const Reports = () => {
             />
           </div>
 
-          <ExportButton small filename={`sales-${selectedMonth}`} label="Export Sales" rows={monthlySales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Total (PHP)", value: (t) => t.total }]} />
-          <ExportButton small filename={`payout-report-${selectedMonth}`} label="Export Payout" rows={payoutRows} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.rate }, { label: "Services Done", value: (r) => r.count }, { label: "Service Revenue (PHP)", value: (r) => r.revenue }, { label: "Commission Earned (PHP)", value: (r) => r.comm }, { label: "Tips (PHP)", value: (r) => r.tips }, { label: "Total Payout (PHP)", value: (r) => r.payout }]} />
+          <ExportButton small filename={`sales-${selectedMonth}`} label="Export Sales" rows={monthlySales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Total (MOP)", value: (t) => t.total }]} />
+          <ExportButton small filename={`payout-report-${selectedMonth}`} label="Export Payout" rows={payoutRows} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.rate }, { label: "Services Done", value: (r) => r.count }, { label: "Service Revenue (MOP)", value: (r) => r.revenue }, { label: "Commission Earned (MOP)", value: (r) => r.comm }, { label: "Tips (MOP)", value: (r) => r.tips }, { label: "Total Payout (MOP)", value: (r) => r.payout }]} />
           <button className="btn-secondary" onClick={() => window.print()}>
             <Printer size={16} /> Print Report
           </button>

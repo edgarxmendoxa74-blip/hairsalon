@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useCurrency } from "../context/CurrencyContext";
 import { useSalon } from "../context/SalonContext";
 import Navigation from "./Navigation";
 import PageSlides from "./PageSlides";
@@ -17,14 +16,11 @@ const loadZone = () => {
 
 const TabletShell = ({ children }) => {
   const { toastMessage, activeTab } = useSalon();
-  const { currency, setCurrency, rate, setRate } = useCurrency();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [zone, setZone] = useState(loadZone);
-  const [rateText, setRateText] = useState(String(rate));
   const chooseZone = (z) => {
     setZone(z);
-    setCurrency(z === "MO" ? "MOP" : "PHP");
     try { localStorage.setItem(ZONE_KEY, z); } catch { /* storage unavailable */ }
   };
 
@@ -98,21 +94,11 @@ const TabletShell = ({ children }) => {
                 <h1 className="page-title">{getPageTitle()}</h1>
               </div>
 
-              <div className="currency-switch" title="Display currency. Prices are stored in PHP.">
-                <div className="currency-toggle">
-                  <button type="button" className={currency === "PHP" ? "active" : ""} onClick={() => setCurrency("PHP")}>₱ PHP</button>
-                  <button type="button" className={currency === "MOP" ? "active" : ""} onClick={() => setCurrency("MOP")}>MOP$ MOP</button>
-                </div>
+              <div className="currency-switch">
                 <div className="currency-toggle" title="Display time zone">
                   <button type="button" className={zone === "PH" ? "active" : ""} onClick={() => chooseZone("PH")}>Philippines</button>
                   <button type="button" className={zone === "MO" ? "active" : ""} onClick={() => chooseZone("MO")}>Macau</button>
                 </div>
-                {currency === "MOP" && (
-                  <label className="currency-rate">
-                    MOP$1 = ₱
-                    <input type="number" min="1" step="0.01" value={rateText} onChange={(e) => { setRateText(e.target.value); if (Number(e.target.value) > 0) setRate(e.target.value); }} onBlur={() => setRateText(String(rate))} />
-                  </label>
-                )}
               </div>
 
               <div className="topbar-clock">

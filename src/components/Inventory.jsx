@@ -139,7 +139,7 @@ const Inventory = () => {
 
         <div style={{ display: "flex", gap: "12px" }}>
           {activeTabSub === "catalog" ? (
-            <ExportButton filename="inventory-catalog" rows={filteredInventory} columns={[{ label: "Product ID", value: (i) => i.id }, { label: "Name", value: (i) => i.name }, { label: "Category", value: (i) => i.category }, { label: "Unit", value: (i) => i.unit }, { label: "Current Stock", value: (i) => i.currentStock }, { label: "Min Threshold", value: (i) => i.minStockThreshold }, { label: "Status", value: (i) => (i.currentStock === 0 ? 'Out of Stock' : i.currentStock <= i.minStockThreshold ? 'Low Stock' : 'In Stock') }, { label: "Unit Cost (PHP)", value: (i) => i.unitCost }, { label: "Retail Price (PHP)", value: (i) => i.retailPrice }, { label: "Supplier", value: (i) => i.supplier }]} />
+            <ExportButton filename="inventory-catalog" rows={filteredInventory} columns={[{ label: "Product ID", value: (i) => i.id }, { label: "Name", value: (i) => i.name }, { label: "Category", value: (i) => i.category }, { label: "Unit", value: (i) => i.unit }, { label: "Current Stock", value: (i) => i.currentStock }, { label: "Min Threshold", value: (i) => i.minStockThreshold }, { label: "Status", value: (i) => (i.currentStock === 0 ? 'Out of Stock' : i.currentStock <= i.minStockThreshold ? 'Low Stock' : 'In Stock') }, { label: "Unit Cost (MOP)", value: (i) => i.unitCost }, { label: "Retail Price (MOP)", value: (i) => i.retailPrice }, { label: "Supplier", value: (i) => i.supplier }]} />
           ) : (
             <ExportButton filename="inventory-movements" label="Export Log" rows={inventoryLogs} columns={[{ label: "Log ID", value: (l) => l.id }, { label: "Date & Time", value: (l) => l.date }, { label: "Product", value: (l) => l.productName }, { label: "Type", value: (l) => l.type }, { label: "Quantity", value: (l) => l.quantity }, { label: "Previous Stock", value: (l) => l.previousStock }, { label: "New Stock", value: (l) => l.newStock }, { label: "Handled By", value: (l) => l.staffName }, { label: "Reason", value: (l) => l.reason }]} />
           )}
@@ -457,7 +457,7 @@ const Inventory = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Unit Cost Price (₱ PHP) *</label>
+                    <label>Unit Cost Price (MOP$) *</label>
                     <input
                       type="number"
                       className="form-control"
@@ -468,7 +468,7 @@ const Inventory = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Retail Selling Price (₱ PHP) (0 if internal)</label>
+                    <label>Retail Selling Price (MOP$) (0 if internal)</label>
                     <input
                       type="number"
                       className="form-control"

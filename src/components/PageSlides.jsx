@@ -18,7 +18,7 @@ const SLIDES = {
     { title: "Service History", text: "Review past services to recommend the perfect next treatment." }
   ],
   services: [
-    { title: "Services & Pricing", text: "Maintain your full menu with prices in PHP or MOP." },
+    { title: "Services & Pricing", text: "Maintain your full menu with prices in MOP." },
     { title: "Keep It Current", text: "Edit durations and prices as your offerings change." },
     { title: "Popular Picks", text: "Highlight signature services your clients love." }
   ],

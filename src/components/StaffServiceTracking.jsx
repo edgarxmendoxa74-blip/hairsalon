@@ -163,8 +163,8 @@ const StaffServiceTracking = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="staff-service-logs" label="Export Logs" rows={filteredTracking} columns={[{ label: "Log ID", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Stylist", value: (t) => t.staffName }, { label: "Client", value: (t) => t.clientName }, { label: "Service", value: (t) => t.serviceName }, { label: "Service Amount (PHP)", value: (t) => t.serviceAmount }, { label: "Commission Rate (%)", value: (t) => t.commissionRate }, { label: "Commission Earned (PHP)", value: (t) => t.commissionEarned }, { label: "Tip (PHP)", value: (t) => t.tipAmount || 0 }, { label: "Total Earnings (PHP)", value: (t) => t.totalEarnings }]} />
-          <ExportButton filename={`staff-performance-${selectedMonthFilter || "all"}`} label="Export Breakdown" rows={staffMonthlyStats} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.commissionRate }, { label: "Services Done", value: (r) => r.servicesDone }, { label: "Revenue (PHP)", value: (r) => r.totalRevenue }, { label: "Commission Earned (PHP)", value: (r) => r.totalCommission }, { label: "Tips (PHP)", value: (r) => r.totalTips }, { label: "Total Payout (PHP)", value: (r) => r.totalPayout }]} />
+          <ExportButton filename="staff-service-logs" label="Export Logs" rows={filteredTracking} columns={[{ label: "Log ID", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Stylist", value: (t) => t.staffName }, { label: "Client", value: (t) => t.clientName }, { label: "Service", value: (t) => t.serviceName }, { label: "Service Amount (MOP)", value: (t) => t.serviceAmount }, { label: "Commission Rate (%)", value: (t) => t.commissionRate }, { label: "Commission Earned (MOP)", value: (t) => t.commissionEarned }, { label: "Tip (MOP)", value: (t) => t.tipAmount || 0 }, { label: "Total Earnings (MOP)", value: (t) => t.totalEarnings }]} />
+          <ExportButton filename={`staff-performance-${selectedMonthFilter || "all"}`} label="Export Breakdown" rows={staffMonthlyStats} columns={[{ label: "Stylist", value: (r) => r.name }, { label: "Role", value: (r) => r.role }, { label: "Commission Rate (%)", value: (r) => r.commissionRate }, { label: "Services Done", value: (r) => r.servicesDone }, { label: "Revenue (MOP)", value: (r) => r.totalRevenue }, { label: "Commission Earned (MOP)", value: (r) => r.totalCommission }, { label: "Tips (MOP)", value: (r) => r.totalTips }, { label: "Total Payout (MOP)", value: (r) => r.totalPayout }]} />
           <button className="btn-primary" onClick={() => setIsRecordModalOpen(true)}>
             <PlusCircle size={20} /> Record New Staff Service
           </button>
@@ -391,7 +391,7 @@ const StaffServiceTracking = () => {
 
                   {/* Service Charge Amount */}
                   <div className="form-group">
-                    <label>Service Price (₱ PHP) *</label>
+                    <label>Service Price (MOP$) *</label>
                     <input
                       type="number"
                       className="form-control"
@@ -403,7 +403,7 @@ const StaffServiceTracking = () => {
 
                   {/* Tip Amount */}
                   <div className="form-group">
-                    <label>Client Tip Amount (₱ PHP)</label>
+                    <label>Client Tip Amount (MOP$)</label>
                     <input
                       type="number"
                       className="form-control"

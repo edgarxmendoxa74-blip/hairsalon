@@ -10,7 +10,7 @@ export const exportCsv = (filename, columns, rows) => {
     columns.map((c) => escapeCell(c.label)).join(","),
     ...rows.map((r) => columns.map((c) => escapeCell(c.value(r))).join(","))
   ];
-  // BOM so Excel opens UTF-8 (₱, accents) correctly
+  // BOM so Excel opens UTF-8 (accents) correctly
   const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

@@ -97,7 +97,7 @@ const Clients = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="clients" rows={filteredClients} columns={[{ label: "Client ID", value: (c) => c.id }, { label: "Name", value: (c) => c.name }, { label: "Phone", value: (c) => c.phone }, { label: "Email", value: (c) => c.email }, { label: "Location", value: (c) => formatAddress(c) }, { label: "VIP", value: (c) => (c.vip ? "Yes" : "No") }, { label: "Total Visits", value: (c) => c.totalVisits }, { label: "Total Spent (PHP)", value: (c) => c.totalSpent }, { label: "Registered", value: (c) => c.registeredDate }, { label: "Notes", value: (c) => c.notes }, { label: "Last Treatment Notes", value: (c) => { const r = c.treatmentRecords?.[0]; return r ? [r.productsUsed?.join(", "), r.notes].filter(Boolean).join(" — ") : ""; } }]} />
+          <ExportButton filename="clients" rows={filteredClients} columns={[{ label: "Client ID", value: (c) => c.id }, { label: "Name", value: (c) => c.name }, { label: "Phone", value: (c) => c.phone }, { label: "Email", value: (c) => c.email }, { label: "Location", value: (c) => formatAddress(c) }, { label: "VIP", value: (c) => (c.vip ? "Yes" : "No") }, { label: "Total Visits", value: (c) => c.totalVisits }, { label: "Total Spent (MOP)", value: (c) => c.totalSpent }, { label: "Registered", value: (c) => c.registeredDate }, { label: "Notes", value: (c) => c.notes }, { label: "Last Treatment Notes", value: (c) => { const r = c.treatmentRecords?.[0]; return r ? [r.productsUsed?.join(", "), r.notes].filter(Boolean).join(" — ") : ""; } }]} />
           <button className="btn-primary" onClick={openAdd}>
             <PlusCircle size={20} /> Register New Client
           </button>

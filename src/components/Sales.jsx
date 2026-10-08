@@ -110,7 +110,7 @@ const Sales = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="sales" rows={filteredSales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Location", value: (t) => locationOf(t.clientId) }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Items", value: (t) => t.items.map((i) => i.name + ' (x' + i.qty + ')').join('; ') }, { label: "Subtotal (PHP)", value: (t) => t.subtotal }, { label: "Discount (PHP)", value: (t) => t.discount }, { label: "Tax (PHP)", value: (t) => t.tax }, { label: "Total Paid (PHP)", value: (t) => t.total }]} />
+          <ExportButton filename="sales" rows={filteredSales} columns={[{ label: "Invoice Ref", value: (t) => t.id }, { label: "Date & Time", value: (t) => t.date }, { label: "Client", value: (t) => t.clientName }, { label: "Location", value: (t) => locationOf(t.clientId) }, { label: "Payment Method", value: (t) => t.paymentMethod }, { label: "Items", value: (t) => t.items.map((i) => i.name + ' (x' + i.qty + ')').join('; ') }, { label: "Subtotal (MOP)", value: (t) => t.subtotal }, { label: "Discount (MOP)", value: (t) => t.discount }, { label: "Tax (MOP)", value: (t) => t.tax }, { label: "Total Paid (MOP)", value: (t) => t.total }]} />
           <button className="btn-primary" onClick={() => setIsPOSModalOpen(true)}>
             <ShoppingBag size={20} /> New POS Transaction
           </button>
@@ -270,7 +270,7 @@ const Sales = () => {
 
                     <div className="pos-pay-grid">
                       <div className="form-group">
-                        <label>Discount Amount (₱ PHP)</label>
+                        <label>Discount Amount (MOP$)</label>
                         <input type="number" min="0" className="form-control" value={discountAmt} onChange={(e) => setDiscountAmt(e.target.value)} />
                       </div>
                       <div className="form-group" style={{ gridColumn: "1 / -1" }}>

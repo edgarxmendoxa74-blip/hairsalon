@@ -103,7 +103,7 @@ const Appointments = () => {
         </div>
 
         <div className="header-actions">
-          <ExportButton filename="appointments" rows={filteredApts} columns={[{ label: "Appointment ID", value: (a) => a.id }, { label: "Date", value: (a) => a.date }, { label: "Time", value: (a) => a.time }, { label: "Client", value: (a) => a.clientName }, { label: "Phone", value: (a) => a.clientPhone }, { label: "Service", value: (a) => a.serviceName }, { label: "Stylist", value: (a) => a.staffName }, { label: "Duration (min)", value: (a) => a.duration }, { label: "Amount (PHP)", value: (a) => a.amount }, { label: "Status", value: (a) => a.status }]} />
+          <ExportButton filename="appointments" rows={filteredApts} columns={[{ label: "Appointment ID", value: (a) => a.id }, { label: "Date", value: (a) => a.date }, { label: "Time", value: (a) => a.time }, { label: "Client", value: (a) => a.clientName }, { label: "Phone", value: (a) => a.clientPhone }, { label: "Service", value: (a) => a.serviceName }, { label: "Stylist", value: (a) => a.staffName }, { label: "Duration (min)", value: (a) => a.duration }, { label: "Amount (MOP)", value: (a) => a.amount }, { label: "Status", value: (a) => a.status }]} />
           <button className="btn-primary" onClick={() => setIsBookModalOpen(true)}>
             <PlusCircle size={20} /> Book New Appointment
           </button>
@@ -323,7 +323,7 @@ const Appointments = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Client Tip for {selectedApt.staffName} (₱ PHP)</label>
+                  <label>Client Tip for {selectedApt.staffName} (MOP$)</label>
                   <input
                     type="number"
                     className="form-control"
